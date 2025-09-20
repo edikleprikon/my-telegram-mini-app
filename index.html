@@ -14,6 +14,9 @@
             --button-color: #40a7e3;
             --table-color: #2e7d32;
             --trump-color: #d32f2f;
+            --online-color: #4caf50;
+            --offline-color: #f44336;
+            --waiting-color: #ff9800;
         }
         
         body {
@@ -216,20 +219,21 @@
             font-size: 24px;
         }
         
-        .bot-area {
+        .opponent-area {
             height: 120px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
             font-weight: bold;
+            flex-direction: column;
         }
         
-        .bot-cards {
+        .opponent-cards {
             display: flex;
         }
         
-        .bot-card {
+        .opponent-card {
             width: 40px;
             height: 60px;
             background: repeating-linear-gradient(
@@ -243,6 +247,149 @@
             margin: 0 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+        
+        .multiplayer-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .mode-button {
+            padding: 15px 25px;
+            font-size: 18px;
+        }
+        
+        .online-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background-color: var(--online-color);
+        }
+        
+        .status-offline {
+            background-color: var(--offline-color);
+        }
+        
+        .status-waiting {
+            background-color: var(--waiting-color);
+        }
+        
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .player-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            margin-right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .waiting-room {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--button-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .chat-container {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chat-messages {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-input {
+            display: flex;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+        }
+        
+        .chat-input button {
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .message {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .message.self {
+            background-color: #e3f2fd;
+            text-align: right;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #777;
+        }
     </style>
 </head>
 <body>
@@ -253,6 +400,28 @@
     <div class="container">
         <div class="balance">
             Баланс: <span id="balance">1000</span> ₽
+        </div>
+        
+        <div class="player-info">
+            <div class="player-item">
+                <div class="player-avatar" id="player-avatar">Я</div>
+                <div>
+                    <div>Вы</div>
+                    <div id="player-cards">Карт: 0</div>
+                </div>
+            </div>
+            <div class="player-item">
+                <div class="player-avatar" id="opponent-avatar">?</div>
+                <div>
+                    <div id="opponent-name">Ожидание...</div>
+                    <div id="opponent-cards-count">Карт: 0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mode-selector">
+            <button class="mode-button" onclick="selectMode('single')">Играть с ботом</button>
+            <button class="mode-button" onclick="selectMode('multiplayer')">Играть с другом</button>
         </div>
         
         <div id="betting-panel" class="betting-panel">
@@ -267,12 +436,38 @@
             <button onclick="startGame()" style="margin-top: 15px; padding: 15px 30px;">Играть</button>
         </div>
         
+        <div id="multiplayer-panel" class="multiplayer-panel" style="display: none;">
+            <h2>Мультиплеер</h2>
+            <div class="online-status">
+                <div class="status-dot" id="connection-status"></div>
+                <span id="connection-text">Подключение...</span>
+            </div>
+            
+            <div id="room-creation" style="margin: 20px 0;">
+                <button onclick="createRoom()">Создать комнату</button>
+                <div style="margin: 15px 0;">или</div>
+                <div style="display: flex;">
+                    <input type="text" id="room-id-input" placeholder="ID комнаты" style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px 0 0 5px;">
+                    <button onclick="joinRoom()" style="border-radius: 0 5px 5px 0;">Присоединиться</button>
+                </div>
+            </div>
+            
+            <div id="waiting-room" class="waiting-room" style="display: none;">
+                <h3>Ожидание соперника</h3>
+                <div class="loader"></div>
+                <p>ID комнаты: <strong id="room-id"></strong></p>
+                <p>Поделитесь этим ID с другом</p>
+                <button onclick="cancelWaiting()">Отмена</button>
+            </div>
+        </div>
+        
         <div id="game-container" style="display: none;">
             <div class="game-status" id="game-status">Ваш ход</div>
             
-            <div class="bot-area">
-                <div class="bot-cards" id="bot-cards">
-                    <!-- Карты бота будут отображаться здесь -->
+            <div class="opponent-area">
+                <div id="opponent-info"></div>
+                <div class="opponent-cards" id="opponent-cards">
+                    <!-- Карты противника будут отображаться здесь -->
                 </div>
             </div>
             
@@ -295,6 +490,15 @@
                 <button id="take-button" onclick="takeCards()">Взять</button>
                 <button id="pass-button" onclick="passTurn()">Бито</button>
             </div>
+            
+            <div class="chat-container" id="chat-container">
+                <h3>Чат</h3>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Введите сообщение...">
+                    <button onclick="sendMessage()">Отпр.</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -302,17 +506,246 @@
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Получаем данные пользователя
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('player-avatar').textContent = user.first_name ? user.first_name[0] : 'И';
+        }
         
         // Игровые переменные
         let balance = 1000;
         let currentBet = 50;
         let deck = [];
         let playerHand = [];
-        let botHand = [];
+        let opponentHand = [];
         let tableCards = [];
         let trumpCard = null;
         let isPlayerTurn = true;
         let deckCount = 36;
+        let gameMode = 'single'; // 'single' или 'multiplayer'
+        let roomId = null;
+        let opponent = null;
+        let connectionStatus = 'disconnected';
+        
+        // Симуляция WebSocket соединения (в реальном приложении нужно использовать WebSocket)
+        let websocketSimulator = {
+            connect: function() {
+                setConnectionStatus('connecting');
+                // Имитация подключения
+                setTimeout(() => {
+                    setConnectionStatus('connected');
+                    // Имитация получения списка доступных комнат
+                    simulateWebSocketMessage({ type: 'rooms_list', rooms: [] });
+                }, 1000);
+            },
+            createRoom: function() {
+                setConnectionStatus('waiting');
+                // Генерируем случайный ID комнаты
+                roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                document.getElementById('room-id').textContent = roomId;
+                document.getElementById('room-creation').style.display = 'none';
+                document.getElementById('waiting-room').style.display = 'block';
+                
+                // Имитация ожидания противника
+                setTimeout(() => {
+                    // Имитация подключения противника
+                    opponent = {
+                        id: 'opponent_123',
+                        first_name: 'Друг',
+                        username: 'friend'
+                    };
+                    
+                    document.getElementById('opponent-avatar').textContent = opponent.first_name ? opponent.first_name[0] : 'Д';
+                    document.getElementById('opponent-name').textContent = opponent.first_name || 'Игрок';
+                    
+                    // Имитация начала игры
+                    simulateWebSocketMessage({ 
+                        type: 'game_start', 
+                        opponent: opponent,
+                        room: roomId
+                    });
+                }, 3000);
+            },
+            joinRoom: function(roomId) {
+                setConnectionStatus('connecting');
+                // Имитация подключения к комнате
+                setTimeout(() => {
+                    setConnectionStatus('connected');
+                    
+                    // Имитация успешного подключения к комнате
+                    opponent = {
+                        id: 'host_123',
+                        first_name: 'Хост',
+                        username: 'host'
+                    };
+                    
+                    document.getElementById('opponent-avatar').textContent = opponent.first_name ? opponent.first_name[0] : 'Х';
+                    document.getElementById('opponent-name').textContent = opponent.first_name || 'Хост';
+                    
+                    // Имитация начала игры
+                    simulateWebSocketMessage({ 
+                        type: 'game_start', 
+                        opponent: opponent,
+                        room: roomId
+                    });
+                }, 2000);
+            },
+            sendMessage: function(message) {
+                // Имитация отправки сообщения
+                console.log('Отправка сообщения:', message);
+                // Имитация получения сообщения
+                setTimeout(() => {
+                    simulateWebSocketMessage({
+                        type: 'message',
+                        from: opponent.id,
+                        text: message.text,
+                        timestamp: Date.now()
+                    });
+                }, 500);
+            },
+            makeMove: function(move) {
+                // Имитация отправки хода
+                console.log('Отправка хода:', move);
+                // Имитация получения хода противника
+                setTimeout(() => {
+                    simulateWebSocketMessage({
+                        type: 'move',
+                        from: opponent.id,
+                        move: simulateOpponentMove()
+                    });
+                }, 2000);
+            }
+        };
+        
+        function simulateWebSocketMessage(message) {
+            switch (message.type) {
+                case 'rooms_list':
+                    console.log('Получен список комнат:', message.rooms);
+                    break;
+                case 'game_start':
+                    console.log('Игра началась с', message.opponent);
+                    startMultiplayerGame(message.opponent);
+                    break;
+                case 'move':
+                    console.log('Получен ход от противника:', message.move);
+                    handleOpponentMove(message.move);
+                    break;
+                case 'message':
+                    console.log('Получено сообщение:', message);
+                    addMessageToChat(message.from, message.text, message.timestamp, false);
+                    break;
+                case 'error':
+                    console.error('Ошибка:', message.error);
+                    alert('Ошибка: ' + message.error);
+                    break;
+            }
+        }
+        
+        function setConnectionStatus(status) {
+            connectionStatus = status;
+            const statusDot = document.getElementById('connection-status');
+            const statusText = document.getElementById('connection-text');
+            
+            statusDot.className = 'status-dot';
+            switch(status) {
+                case 'disconnected':
+                    statusDot.classList.add('status-offline');
+                    statusText.textContent = 'Отключено';
+                    break;
+                case 'connecting':
+                    statusDot.classList.add('status-waiting');
+                    statusText.textContent = 'Подключение...';
+                    break;
+                case 'connected':
+                    statusDot.classList.add('status-online');
+                    statusText.textContent = 'Подключено';
+                    break;
+                case 'waiting':
+                    statusDot.classList.add('status-waiting');
+                    statusText.textContent = 'Ожидание соперника...';
+                    break;
+            }
+        }
+        
+        function selectMode(mode) {
+            gameMode = mode;
+            if (mode === 'single') {
+                document.getElementById('multiplayer-panel').style.display = 'none';
+                document.getElementById('betting-panel').style.display = 'block';
+            } else {
+                document.getElementById('betting-panel').style.display = 'none';
+                document.getElementById('multiplayer-panel').style.display = 'block';
+                websocketSimulator.connect();
+            }
+        }
+        
+        function createRoom() {
+            websocketSimulator.createRoom();
+        }
+        
+        function joinRoom() {
+            const roomId = document.getElementById('room-id-input').value.trim();
+            if (roomId) {
+                websocketSimulator.joinRoom(roomId);
+            } else {
+                alert('Введите ID комнаты');
+            }
+        }
+        
+        function cancelWaiting() {
+            document.getElementById('waiting-room').style.display = 'none';
+            document.getElementById('room-creation').style.display = 'block';
+            setConnectionStatus('connected');
+        }
+        
+        function startMultiplayerGame(opponentPlayer) {
+            opponent = opponentPlayer;
+            document.getElementById('multiplayer-panel').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            document.getElementById('chat-container').style.display = 'block';
+            
+            // Начинаем игру
+            startGame();
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            
+            if (text) {
+                // Добавляем сообщение в чат
+                addMessageToChat('self', text, Date.now(), true);
+                
+                // Отправляем сообщение через WebSocket
+                websocketSimulator.sendMessage({
+                    type: 'message',
+                    text: text,
+                    timestamp: Date.now()
+                });
+                
+                // Очищаем поле ввода
+                input.value = '';
+            }
+        }
+        
+        function addMessageToChat(sender, text, timestamp, isSelf) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSelf ? 'self' : ''}`;
+            
+            const time = new Date(timestamp).toLocaleTimeString();
+            const senderName = isSelf ? 'Вы' : (opponent?.first_name || 'Оппонент');
+            
+            messageDiv.innerHTML = `
+                <div><strong>${senderName}:</strong> ${text}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
         
         // Обновление интерфейса
         function updateBalance() {
@@ -336,6 +769,11 @@
             // Скрываем панель ставок, показываем игровое поле
             document.getElementById('betting-panel').style.display = 'none';
             document.getElementById('game-container').style.display = 'block';
+            
+            // Скрываем чат в одиночной игре
+            if (gameMode === 'single') {
+                document.getElementById('chat-container').style.display = 'none';
+            }
             
             // Создаем колоду
             initializeDeck();
@@ -379,7 +817,7 @@
         
         function dealCards() {
             playerHand = [];
-            botHand = [];
+            opponentHand = [];
             
             for (let i = 0; i < 6; i++) {
                 if (deck.length > 0) {
@@ -387,35 +825,41 @@
                     deckCount--;
                 }
                 if (deck.length > 0) {
-                    botHand.push(deck.pop());
+                    opponentHand.push(deck.pop());
                     deckCount--;
                 }
             }
             
-            updateBotCardsDisplay();
+            updateOpponentCardsDisplay();
+            updatePlayerCardsCount();
         }
         
         function determineFirstTurn() {
             // Определяем кто ходит первым - у кого младший козырь
             let playerLowestTrump = findLowestTrump(playerHand);
-            let botLowestTrump = findLowestTrump(botHand);
+            let opponentLowestTrump = findLowestTrump(opponentHand);
             
-            if (!playerLowestTrump && !botLowestTrump) {
+            if (!playerLowestTrump && !opponentLowestTrump) {
                 // Если козырей ни у кого нет, определяем случайно
                 isPlayerTurn = Math.random() > 0.5;
             } else if (!playerLowestTrump) {
                 isPlayerTurn = false;
-            } else if (!botLowestTrump) {
+            } else if (!opponentLowestTrump) {
                 isPlayerTurn = true;
             } else {
                 // Сравниваем младшие козыри
-                isPlayerTurn = getCardValue(playerLowestTrump) < getCardValue(botLowestTrump);
+                isPlayerTurn = getCardValue(playerLowestTrump) < getCardValue(opponentLowestTrump);
             }
             
             updateGameStatus();
             
             if (!isPlayerTurn) {
-                setTimeout(botTurn, 1500);
+                if (gameMode === 'single') {
+                    setTimeout(botTurn, 1500);
+                } else {
+                    // В multiplayer ждем ход противника
+                    document.getElementById('game-status').textContent = 'Ход противника';
+                }
             }
         }
         
@@ -448,15 +892,21 @@
             }
         }
         
-        function updateBotCardsDisplay() {
-            const botCardsElement = document.getElementById('bot-cards');
-            botCardsElement.innerHTML = '';
+        function updateOpponentCardsDisplay() {
+            const opponentCardsElement = document.getElementById('opponent-cards');
+            opponentCardsElement.innerHTML = '';
             
-            for (let i = 0; i < botHand.length; i++) {
+            for (let i = 0; i < opponentHand.length; i++) {
                 const cardElement = document.createElement('div');
-                cardElement.className = 'bot-card';
-                botCardsElement.appendChild(cardElement);
+                cardElement.className = 'opponent-card';
+                opponentCardsElement.appendChild(cardElement);
             }
+            
+            document.getElementById('opponent-cards-count').textContent = `Карт: ${opponentHand.length}`;
+        }
+        
+        function updatePlayerCardsCount() {
+            document.getElementById('player-cards').textContent = `Карт: ${playerHand.length}`;
         }
         
         function updateGameStatus() {
@@ -492,7 +942,8 @@
                 playerHandElement.appendChild(cardElement);
             });
             
-            updateBotCardsDisplay();
+            updateOpponentCardsDisplay();
+            updatePlayerCardsCount();
             updateDeckDisplay();
             updateGameStatus();
         }
@@ -561,8 +1012,21 @@
                 
                 renderGame();
                 
-                // Ход бота
-                setTimeout(botTurn, 1000);
+                if (gameMode === 'single') {
+                    // Ход бота
+                    setTimeout(botTurn, 1000);
+                } else {
+                    // Отправляем ход противнику
+                    websocketSimulator.makeMove({
+                        type: 'move',
+                        card: card,
+                        table: tableCards
+                    });
+                    
+                    updateGameStatus();
+                }
+                
+                checkGameEnd();
             }
         }
         
@@ -594,18 +1058,18 @@
             
             if (tableCards.length === 0) {
                 // Бот ходит first - выбирает случайную карту
-                if (botHand.length > 0) {
-                    const cardToPlay = botHand[0];
+                if (opponentHand.length > 0) {
+                    const cardToPlay = opponentHand[0];
                     tableCards.push(cardToPlay);
-                    botHand.splice(0, 1);
+                    opponentHand.splice(0, 1);
                     botPlayed = true;
                 }
             } else if (tableCards.length % 2 === 0) {
                 // Бот атакует - ищет карты того же достоинства, что на столе
-                for (let card of botHand) {
+                for (let card of opponentHand) {
                     if (tableCards.some(tableCard => tableCard.rank === card.rank)) {
                         tableCards.push(card);
-                        botHand.splice(botHand.indexOf(card), 1);
+                        opponentHand.splice(opponentHand.indexOf(card), 1);
                         botPlayed = true;
                         break;
                     }
@@ -613,10 +1077,10 @@
             } else {
                 // Бот защищается - пытается побить карту
                 const cardToBeat = tableCards[tableCards.length - 1];
-                for (let card of botHand) {
+                for (let card of opponentHand) {
                     if (canBeat(card, cardToBeat)) {
                         tableCards.push(card);
-                        botHand.splice(botHand.indexOf(card), 1);
+                        opponentHand.splice(opponentHand.indexOf(card), 1);
                         botPlayed = true;
                         break;
                     }
@@ -624,14 +1088,14 @@
                 
                 if (!botPlayed) {
                     // Бот берет карты
-                    tableCards.forEach(card => botHand.push(card));
+                    tableCards.forEach(card => opponentHand.push(card));
                     tableCards = [];
                 }
             }
             
             // Добираем карту из колоды, если есть
             if (botPlayed && deck.length > 0) {
-                botHand.push(deck.pop());
+                opponentHand.push(deck.pop());
                 deckCount--;
             }
             
@@ -644,6 +1108,65 @@
             }
         }
         
+        function simulateOpponentMove() {
+            // Имитация хода противника в multiplayer
+            // В реальном приложении это будет приходить с сервера
+            let move = null;
+            
+            if (tableCards.length === 0) {
+                // Противник ходит first - выбирает случайную карту
+                if (opponentHand.length > 0) {
+                    const cardToPlay = opponentHand[0];
+                    tableCards.push(cardToPlay);
+                    opponentHand.splice(0, 1);
+                    move = { type: 'attack', card: cardToPlay };
+                }
+            } else if (tableCards.length % 2 === 0) {
+                // Противник атакует - ищет карты того же достоинства, что на столе
+                for (let card of opponentHand) {
+                    if (tableCards.some(tableCard => tableCard.rank === card.rank)) {
+                        tableCards.push(card);
+                        opponentHand.splice(opponentHand.indexOf(card), 1);
+                        move = { type: 'attack', card: card };
+                        break;
+                    }
+                }
+            } else {
+                // Противник защищается - пытается побить карту
+                const cardToBeat = tableCards[tableCards.length - 1];
+                for (let card of opponentHand) {
+                    if (canBeat(card, cardToBeat)) {
+                        tableCards.push(card);
+                        opponentHand.splice(opponentHand.indexOf(card), 1);
+                        move = { type: 'defend', card: card, against: cardToBeat };
+                        break;
+                    }
+                }
+                
+                if (!move) {
+                    // Противник берет карты
+                    tableCards.forEach(card => opponentHand.push(card));
+                    tableCards = [];
+                    move = { type: 'take' };
+                }
+            }
+            
+            // Добираем карту из колоды, если есть
+            if (move && move.type !== 'take' && deck.length > 0) {
+                opponentHand.push(deck.pop());
+                deckCount--;
+            }
+            
+            isPlayerTurn = true;
+            return move;
+        }
+        
+        function handleOpponentMove(move) {
+            // Обработка хода противника в multiplayer
+            renderGame();
+            checkGameEnd();
+        }
+        
         function takeCards() {
             // Игрок берет карты
             tableCards.forEach(card => playerHand.push(card));
@@ -651,7 +1174,17 @@
             isPlayerTurn = false;
             
             renderGame();
-            setTimeout(botTurn, 1000);
+            
+            if (gameMode === 'single') {
+                setTimeout(botTurn, 1000);
+            } else {
+                // Отправляем уведомление о взятии карт
+                websocketSimulator.makeMove({
+                    type: 'take'
+                });
+                
+                updateGameStatus();
+            }
         }
         
         function passTurn() {
@@ -665,24 +1198,34 @@
                 deckCount--;
             }
             
-            while (botHand.length < 6 && deck.length > 0) {
-                botHand.push(deck.pop());
+            while (opponentHand.length < 6 && deck.length > 0) {
+                opponentHand.push(deck.pop());
                 deckCount--;
             }
             
             renderGame();
-            setTimeout(botTurn, 1000);
+            
+            if (gameMode === 'single') {
+                setTimeout(botTurn, 1000);
+            } else {
+                // Отправляем уведомление о пасе
+                websocketSimulator.makeMove({
+                    type: 'pass'
+                });
+                
+                updateGameStatus();
+            }
         }
         
         function checkGameEnd() {
-            if (playerHand.length === 0 && botHand.length === 0 && deck.length === 0) {
+            if (playerHand.length === 0 && opponentHand.length === 0 && deck.length === 0) {
                 // Ничья
                 endGame(null);
             } else if (playerHand.length === 0 && deck.length === 0) {
                 // Игрок выиграл
                 endGame(true);
-            } else if (botHand.length === 0 && deck.length === 0) {
-                // Бот выиграл
+            } else if (opponentHand.length === 0 && deck.length === 0) {
+                // Противник выиграл
                 endGame(false);
             }
         }
@@ -700,9 +1243,17 @@
             
             updateBalance();
             
-            // Возвращаем к панели ставок
-            document.getElementById('betting-panel').style.display = 'block';
+            // Возвращаем к панели выбора режима
             document.getElementById('game-container').style.display = 'none';
+            
+            if (gameMode === 'single') {
+                document.getElementById('betting-panel').style.display = 'block';
+            } else {
+                document.getElementById('multiplayer-panel').style.display = 'block';
+                document.getElementById('waiting-room').style.display = 'none';
+                document.getElementById('room-creation').style.display = 'block';
+                setConnectionStatus('connected');
+            }
             
             // Если баланс нулевой, предлагаем начать заново
             if (balance <= 0) {
