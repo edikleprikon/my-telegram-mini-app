@@ -3,426 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дурак со ставками | Telegram Mini App</title>
+    <title>Game Gift Wheel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #f5f5f5;
-            --card-color: #ffffff;
-            --accent-color: #5682a3;
-            --text-color: #333333;
-            --button-color: #40a7e3;
-            --table-color: #2e7d32;
-            --trump-color: #d32f2f;
-            --online-color: #4caf50;
-            --offline-color: #f44336;
-            --waiting-color: #ff9800;
-            --tab-active: #40a7e3;
-            --tab-inactive: #cccccc;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
         }
         
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
         }
         
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            padding-bottom: 70px; /* Для нижней панели вкладок */
-        }
-        
-        .header {
-            text-align: center;
-            padding: 10px 0;
-            background-color: var(--accent-color);
-            color: white;
-            border-radius: 10px 10px 0 0;
-            margin-bottom: 15px;
-        }
-        
-        .game-table {
-            background-color: var(--table-color);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            min-height: 300px;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .deck-area {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .deck {
-            width: 60px;
-            height: 90px;
-            background-color: #f1c40f;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            color: white;
-            font-weight: bold;
-        }
-        
-        .trump-card {
-            width: 60px;
-            height: 90px;
-            background-color: var(--card-color);
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 2px solid var(--trump-color);
-        }
-        
-        .trump-label {
-            color: white;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-        
-        .card {
-            width: 70px;
-            height: 100px;
-            background-color: var(--card-color);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px;
-            margin: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            cursor: pointer;
-            user-select: none;
-            position: absolute;
-            transition: transform 0.3s;
-            font-weight: bold;
-        }
-        
-        .card.red {
-            color: #e74c3c;
-        }
-        
-        .card.black {
-            color: #2c3e50;
-        }
-        
-        .card-top, .card-bottom {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 5px;
-        }
-        
-        .card-center {
-            font-size: 24px;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .player-hand {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            min-height: 120px;
-        }
-        
-        .player-hand .card {
-            position: relative;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-        }
-        
-        button {
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        button:hover {
-            background-color: #2c90c9;
-        }
-        
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        .betting-panel {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px 0;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .balance {
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            margin: 10px 0;
+            max-width: 100%;
             padding: 10px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .game-status {
-            text-align: center;
-            margin: 10px 0;
-            font-weight: bold;
-            height: 24px;
-        }
-        
-        .card-back {
-            background: repeating-linear-gradient(
-                45deg,
-                #2c3e50,
-                #2c3e50 10px,
-                #34495e 10px,
-                #34495e 20px
-            );
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-        }
-        
-        .opponent-area {
-            height: 120px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-            flex-direction: column;
-        }
-        
-        .opponent-cards {
-            display: flex;
-        }
-        
-        .opponent-card {
-            width: 40px;
-            height: 60px;
-            background: repeating-linear-gradient(
-                45deg,
-                #2c3e50,
-                #2c3e50 10px,
-                #34495e 10px,
-                #34495e 20px
-            );
-            border-radius: 5px;
-            margin: 0 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .multiplayer-panel {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px 0;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .mode-selector {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-        }
-        
-        .mode-button {
-            padding: 15px 25px;
-            font-size: 18px;
-        }
-        
-        .online-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-online {
-            background-color: var(--online-color);
-        }
-        
-        .status-offline {
-            background-color: var(--offline-color);
-        }
-        
-        .status-waiting {
-            background-color: var(--waiting-color);
-        }
-        
-        .player-info {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            padding: 10px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .player-item {
-            display: flex;
-            align-items: center;
-        }
-        
-        .player-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            margin-right: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .waiting-room {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--button-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .chat-container {
-            margin-top: 20px;
-            background-color: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .chat-messages {
-            height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .chat-input {
-            display: flex;
-        }
-        
-        .chat-input input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px 0 0 5px;
-        }
-        
-        .chat-input button {
-            border-radius: 0 5px 5px 0;
-        }
-        
-        .message {
-            margin-bottom: 8px;
-            padding: 8px;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        
-        .message.self {
-            background-color: #e3f2fd;
-            text-align: right;
-        }
-        
-        .message-time {
-            font-size: 12px;
-            color: #777;
-        }
-        
-        /* Новые стили для вкладок и статистики */
-        .tabs {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: white;
-            display: flex;
-            justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        
-        .tab {
-            padding: 15px 0;
-            text-align: center;
-            flex-grow: 1;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .tab.active {
-            color: var(--tab-active);
-            border-top: 3px solid var(--tab-active);
-        }
-        
-        .tab.inactive {
-            color: var(--tab-inactive);
+            padding-bottom: 70px;
         }
         
         .tab-content {
@@ -433,14 +33,257 @@
             display: block;
         }
         
-        .online-stats {
+        /* Навигационная панель */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1c1c1c;
             display: flex;
             justify-content: space-around;
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            border-top: 1px solid #333;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .nav-item.active {
+            color: #40a7e3;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        /* Стили для PVP вкладки */
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .wheel {
+            width: 250px;
+            height: 250px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .wheel-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff6b6b 0deg 45deg, 
+                #4ecdc4 45deg 90deg, 
+                #ffd166 90deg 135deg, 
+                #06d6a0 135deg 180deg,
+                #118ab2 180deg 225deg,
+                #073b4c 225deg 270deg,
+                #7209b7 270deg 315deg,
+                #f72585 315deg 360deg
+            );
+            position: relative;
+            overflow: hidden;
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            transform: rotate(0deg);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .wheel-arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background-color: #fff;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 10;
+        }
+        
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background-color: #1c1c1c;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            z-index: 5;
+        }
+        
+        .timer {
+            font-size: 24px;
+            margin: 15px 0;
+            color: #40a7e3;
+        }
+        
+        .players-list {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .player-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #1c1c1c;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+        
+        .player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .player-info {
+            flex-grow: 1;
+        }
+        
+        .player-name {
+            font-weight: bold;
+        }
+        
+        .player-bet {
+            color: #ffd700;
+            font-size: 14px;
+        }
+        
+        .bet-button {
+            background-color: #40a7e3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        
+        /* Стили для инвентаря */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .gift-item {
+            background-color: #1c1c1c;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .gift-image {
+            width: 80px;
+            height: 80px;
+            background-color: #333;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        
+        .gift-name {
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .gift-value {
+            color: #ffd700;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        
+        /* Стили для магазина */
+        .shop-filters {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .filter-btn {
+            background-color: #1c1c1c;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .filter-btn.active {
+            background-color: #40a7e3;
+        }
+        
+        /* Стили для профиля */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-info {
+            flex-grow: 1;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
         }
         
         .stat-item {
@@ -448,361 +291,199 @@
         }
         
         .stat-value {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: bold;
-            color: var(--accent-color);
+            color: #40a7e3;
         }
         
         .stat-label {
-            font-size: 14px;
-            color: #777;
+            font-size: 12px;
+            color: #888;
         }
         
-        .rooms-list {
-            margin-top: 15px;
-        }
-        
-        .room-item {
-            background-color: white;
+        .wallet-section {
+            background-color: #1c1c1c;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .wallet-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        .room-info {
-            flex-grow: 1;
-        }
-        
-        .room-id {
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .room-players {
-            font-size: 14px;
-            color: #777;
-        }
-        
-        .room-bet {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--accent-color);
-        }
-        
-        .profile-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            margin: 0 auto 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-        }
-        
-        .profile-name {
-            font-size: 20px;
-            font-weight: bold;
             margin-bottom: 10px;
         }
         
-        .profile-stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-        }
-        
-        .card-back-selector {
-            margin: 20px 0;
-        }
-        
-        .card-back-option {
-            width: 60px;
-            height: 90px;
-            display: inline-block;
-            margin: 0 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 2px solid transparent;
-        }
-        
-        .card-back-option.selected {
-            border-color: var(--accent-color);
-        }
-        
-        .wallet-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .wallet-address {
-            word-break: break-all;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            margin: 10px 0;
+        .wallet-title {
+            font-weight: bold;
         }
         
         .wallet-balance {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin: 15px 0;
-            color: var(--accent-color);
+            color: #ffd700;
+            font-size: 18px;
         }
         
-        .wallet-actions {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
+        .connect-wallet {
+            background-color: #40a7e3;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Дурак со ставками</h1>
+    <div class="container">
+        <!-- Вкладка PVP -->
+        <div id="pvp-tab" class="tab-content active">
+            <div class="wheel-container">
+                <div class="wheel">
+                    <div class="wheel-arrow"></div>
+                    <div class="wheel-circle" id="wheel-circle">
+                        <div class="wheel-center"></div>
+                    </div>
+                </div>
+                <div class="timer" id="timer">01:00</div>
+                <button class="bet-button" id="place-bet">Сделать ставку</button>
+                
+                <div class="players-list" id="players-list">
+                    <div class="player-item">
+                        <div class="player-avatar">
+                            <img src="https://via.placeholder.com/40" alt="Player">
+                        </div>
+                        <div class="player-info">
+                            <div class="player-name">Алексей</div>
+                            <div class="player-bet">Подарок: Золотая корона (100 монет)</div>
+                        </div>
+                    </div>
+                    <div class="player-item">
+                        <div class="player-avatar">
+                            <img src="https://via.placeholder.com/40" alt="Player">
+                        </div>
+                        <div class="player-info">
+                            <div class="player-name">Мария</div>
+                            <div class="player-bet">Подарок: Бриллиант (150 монет)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Вкладка Инвентарь -->
+        <div id="inventory-tab" class="tab-content">
+            <h2>Мои подарки</h2>
+            <div class="inventory-grid">
+                <div class="gift-item">
+                    <div class="gift-image">🎁</div>
+                    <div class="gift-name">Обычный подарок</div>
+                    <div class="gift-value">50 монет</div>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-image">👑</div>
+                    <div class="gift-name">Золотая корона</div>
+                    <div class="gift-value">100 монет</div>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-image">💎</div>
+                    <div class="gift-name">Бриллиант</div>
+                    <div class="gift-value">150 монет</div>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-image">🏆</div>
+                    <div class="gift-name">Трофей</div>
+                    <div class="gift-value">200 монет</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Вкладка Магазин -->
+        <div id="shop-tab" class="tab-content">
+            <h2>Магазин подарков</h2>
+            <div class="shop-filters">
+                <button class="filter-btn active">Все</button>
+                <button class="filter-btn">Популярные</button>
+                <button class="filter-btn">Новые</button>
+                <button class="filter-btn">Дорогие</button>
+                <button class="filter-btn">Дешёвые</button>
+            </div>
+            <div class="inventory-grid">
+                <div class="gift-item">
+                    <div class="gift-image">🎁</div>
+                    <div class="gift-name">Обычный подарок</div>
+                    <div class="gift-value">50 монет</div>
+                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;">Купить</button>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-image">👑</div>
+                    <div class="gift-name">Золотая корона</div>
+                    <div class="gift-value">100 монет</div>
+                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;">Купить</button>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-image">💎</div>
+                    <div class="gift-name">Бриллиант</div>
+                    <div class="gift-value">150 монет</div>
+                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;">Купить</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Вкладка Профиль -->
+        <div id="profile-tab" class="tab-content">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="https://via.placeholder.com/80" alt="Profile">
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">Иван Петров</div>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">24</div>
+                            <div class="stat-label">Игры</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Победы</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">350</div>
+                            <div class="stat-label">Монеты</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wallet-section">
+                <div class="wallet-header">
+                    <div class="wallet-title">Кошелек Telegram</div>
+                    <div class="wallet-balance">0 TON</div>
+                </div>
+                <button class="connect-wallet" id="connect-wallet">Привязать кошелек</button>
+            </div>
+        </div>
     </div>
     
-    <div class="container">
-        <!-- Вкладка: Комнаты -->
-        <div id="rooms-tab" class="tab-content active">
-            <div class="online-stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="online-players">257</div>
-                    <div class="stat-label">Игроков онлайн</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="active-rooms">42</div>
-                    <div class="stat-label">Активных комнат</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="games-played">1.2k</div>
-                    <div class="stat-label">Игр сегодня</div>
-                </div>
-            </div>
-            
-            <div class="mode-selector">
-                <button class="mode-button" onclick="selectMode('single')">Играть с ботом</button>
-                <button class="mode-button" onclick="selectMode('multiplayer')">Создать комнату</button>
-            </div>
-            
-            <h2>Доступные комнаты</h2>
-            <div class="rooms-list" id="rooms-list">
-                <div class="room-item">
-                    <div class="room-info">
-                        <div class="room-id">#F8J2D9</div>
-                        <div class="room-players">1/2 игроков · Ставка: 100 ₽</div>
-                    </div>
-                    <button onclick="joinRoom('F8J2D9')">Присоединиться</button>
-                </div>
-                <div class="room-item">
-                    <div class="room-info">
-                        <div class="room-id">#K7H3S1</div>
-                        <div class="room-players">1/2 игроков · Ставка: 50 ₽</div>
-                    </div>
-                    <button onclick="joinRoom('K7H3S1')">Присоединиться</button>
-                </div>
-                <div class="room-item">
-                    <div class="room-info">
-                        <div class="room-id">#M4P6R2</div>
-                        <div class="room-players">1/2 игроков · Ставка: 200 ₽</div>
-                    </div>
-                    <button onclick="joinRoom('M4P6R2')">Присоединиться</button>
-                </div>
-                <div class="room-item">
-                    <div class="room-info">
-                        <div class="room-id">#T5W9X8</div>
-                        <div class="room-players">1/2 игроков · Ставка: 150 ₽</div>
-                    </div>
-                    <button onclick="joinRoom('T5W9X8')">Присоединиться</button>
-                </div>
-            </div>
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-tab="pvp-tab">
+            <div class="nav-icon">🎮</div>
+            <div>PVP</div>
         </div>
-        
-        <!-- Вкладка: Профиль -->
-        <div id="profile-tab" class="tab-content">
-            <div class="profile-container">
-                <div class="profile-avatar" id="profile-avatar">И</div>
-                <div class="profile-name" id="profile-name">Иван Иванов</div>
-                <div class="balance">
-                    Баланс: <span id="profile-balance">1000</span> ₽
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <div class="stat-value">24</div>
-                        <div class="stat-label">Победы</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">8</div>
-                        <div class="stat-label">Поражения</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">32</div>
-                        <div class="stat-label">Всего игр</div>
-                    </div>
-                </div>
-                
-                <h3>Выбор обложки карт</h3>
-                <div class="card-back-selector">
-                    <div class="card-back-option selected" style="background: repeating-linear-gradient(45deg, #2c3e50, #2c3e50 10px, #34495e 10px, #34495e 20px);" onclick="selectCardBack(1)"></div>
-                    <div class="card-back-option" style="background: repeating-linear-gradient(45deg, #c0392b, #c0392b 10px, #e74c3c 10px, #e74c3c 20px);" onclick="selectCardBack(2)"></div>
-                    <div class="card-back-option" style="background: repeating-linear-gradient(45deg, #27ae60, #27ae60 10px, #2ecc71 10px, #2ecc71 20px);" onclick="selectCardBack(3)"></div>
-                </div>
-            </div>
+        <div class="nav-item" data-tab="inventory-tab">
+            <div class="nav-icon">🎁</div>
+            <div>Инвентарь</div>
         </div>
-        
-        <!-- Вкладка: Кошелек -->
-        <div id="wallet-tab" class="tab-content">
-            <div class="wallet-container">
-                <h2>TON Кошелек</h2>
-                <p>Подключите TON кошелек для пополнения баланса и вывода выигрышей</p>
-                
-                <div id="wallet-not-connected">
-                    <button onclick="connectWallet()" style="width: 100%; padding: 15px; margin: 20px 0;">Подключить TON кошелек</button>
-                    <p>После подключения вы сможете переводить средства между игровым балансом и кошельком</p>
-                </div>
-                
-                <div id="wallet-connected" style="display: none;">
-                    <div class="wallet-balance">
-                        <span id="ton-balance">0.00</span> TON
-                    </div>
-                    <div class="wallet-address">
-                        Адрес: <span id="wallet-address">EQABCD1234...</span>
-                    </div>
-                    
-                    <div class="wallet-actions">
-                        <button onclick="depositFunds()">Пополнить</button>
-                        <button onclick="withdrawFunds()">Вывести</button>
-                    </div>
-                </div>
-            </div>
+        <div class="nav-item" data-tab="shop-tab">
+            <div class="nav-icon">🛒</div>
+            <div>Магазин</div>
         </div>
-        
-        <!-- Игровые элементы (скрыты по умолчанию) -->
-        <div class="player-info" id="player-info" style="display: none;">
-            <div class="player-item">
-                <div class="player-avatar" id="player-avatar">Я</div>
-                <div>
-                    <div>Вы</div>
-                    <div id="player-cards">Карт: 0</div>
-                </div>
-            </div>
-            <div class="player-item">
-                <div class="player-avatar" id="opponent-avatar">?</div>
-                <div>
-                    <div id="opponent-name">Ожидание...</div>
-                    <div id="opponent-cards-count">Карт: 0</div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="betting-panel" class="betting-panel" style="display: none;">
-            <h2>Сделайте ставку</h2>
-            <div>
-                <button onclick="changeBet(-50)">-50</button>
-                <button onclick="changeBet(-10)">-10</button>
-                <span id="current-bet" style="margin: 0 15px; font-size: 20px;">50</span> ₽
-                <button onclick="changeBet(10)">+10</button>
-                <button onclick="changeBet(50)">+50</button>
-            </div>
-            <button onclick="startGame()" style="margin-top: 15px; padding: 15px 30px;">Играть</button>
-        </div>
-        
-        <div id="multiplayer-panel" class="multiplayer-panel" style="display: none;">
-            <h2>Мультиплеер</h2>
-            <div class="online-status">
-                <div class="status-dot" id="connection-status"></div>
-                <span id="connection-text">Подключение...</span>
-            </div>
-            
-            <div id="room-creation" style="margin: 20px 0;">
-                <button onclick="createRoom()">Создать комнату</button>
-                <div style="margin: 15px 0;">или</div>
-                <div style="display: flex;">
-                    <input type="text" id="room-id-input" placeholder="ID комнаты" style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px 0 0 5px;">
-                    <button onclick="joinRoom()" style="border-radius: 0 5px 5px 0;">Присоединиться</button>
-                </div>
-            </div>
-            
-            <div id="waiting-room" class="waiting-room" style="display: none;">
-                <h3>Ожидание соперника</h3>
-                <div class="loader"></div>
-                <p>ID комнаты: <strong id="room-id"></strong></p>
-                <p>Поделитесь этим ID с другом</p>
-                <button onclick="cancelWaiting()">Отмена</button>
-            </div>
-        </div>
-        
-        <div id="game-container" style="display: none;">
-            <div class="game-status" id="game-status">Ваш ход</div>
-            
-            <div class="opponent-area">
-                <div id="opponent-info"></div>
-                <div class="opponent-cards" id="opponent-cards">
-                    <!-- Карты противника будут отображаться здесь -->
-                </div>
-            </div>
-            
-            <div class="game-table" id="game-table">
-                <div class="deck-area">
-                    <div class="deck" id="deck">
-                        <span id="deck-count">36</span>
-                    </div>
-                    <div class="trump-card" id="trump-card"></div>
-                    <div class="trump-label">Козырь</div>
-                </div>
-                <!-- Карты на столе будут отображаться здесь -->
-            </div>
-            
-            <div class="player-hand" id="player-hand">
-                <!-- Карты игрока -->
-            </div>
-            
-            <div class="controls">
-                <button id="take-button" onclick="takeCards()">Взять</button>
-                <button id="pass-button" onclick="passTurn()">Бито</button>
-            </div>
-            
-            <div class="chat-container" id="chat-container">
-                <h3>Чат</h3>
-                <div class="chat-messages" id="chat-messages"></div>
-                <div class="chat-input">
-                    <input type="text" id="chat-input" placeholder="Введите сообщение...">
-                    <button onclick="sendMessage()">Отпр.</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Нижняя панель вкладок -->
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('rooms')">
-            Комнаты
-        </div>
-        <div class="tab inactive" onclick="switchTab('profile')">
-            Профиль
-        </div>
-        <div class="tab inactive" onclick="switchTab('wallet')">
-            Кошелек
+        <div class="nav-item" data-tab="profile-tab">
+            <div class="nav-icon">👤</div>
+            <div>Профиль</div>
         </div>
     </div>
 
@@ -812,323 +493,124 @@
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Получаем данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('profile-avatar').textContent = user.first_name ? user.first_name[0] : 'И';
-            document.getElementById('profile-name').textContent = user.first_name && user.last_name 
-                ? `${user.first_name} ${user.last_name}` 
-                : (user.first_name || 'Игрок');
+        // Элементы DOM
+        const tabContents = document.querySelectorAll('.tab-content');
+        const navItems = document.querySelectorAll('.nav-item');
+        const wheelCircle = document.getElementById('wheel-circle');
+        const timerElement = document.getElementById('timer');
+        const placeBetButton = document.getElementById('place-bet');
+        const connectWalletButton = document.getElementById('connect-wallet');
+        
+        // Переменные для игры
+        let timer = 60;
+        let timerInterval;
+        let isSpinning = false;
+        
+        // Инициализация приложения
+        function initApp() {
+            setupNavigation();
+            startTimer();
+            setupEventListeners();
         }
         
-        // Игровые переменные
-        let balance = 1000;
-        let currentBet = 50;
-        let deck = [];
-        let playerHand = [];
-        let opponentHand = [];
-        let tableCards = [];
-        let trumpCard = null;
-        let isPlayerTurn = true;
-        let deckCount = 36;
-        let gameMode = 'single'; // 'single' или 'multiplayer'
-        let roomId = null;
-        let opponent = null;
-        let connectionStatus = 'disconnected';
-        let selectedCardBack = 1;
-        let walletConnected = false;
-        
-        // Функции для работы с вкладками
-        function switchTab(tabName) {
-            // Скрываем все вкладки
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Убираем активный класс со всех вкладок
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.classList.add('inactive');
-            });
-            
-            // Показываем нужную вкладку
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            
-            // Активируем соответствующую кнопку
-            const tabs = document.querySelectorAll('.tab');
-            if (tabName === 'rooms') tabs[0].classList.add('active');
-            if (tabName === 'profile') tabs[1].classList.add('active');
-            if (tabName === 'wallet') tabs[2].classList.add('active');
-            
-            document.querySelectorAll('.tab').forEach(tab => {
-                if (tab.classList.contains('active')) {
-                    tab.classList.remove('inactive');
-                }
+        // Настройка навигации
+        function setupNavigation() {
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const tabId = item.getAttribute('data-tab');
+                    
+                    // Деактивируем все вкладки и элементы навигации
+                    tabContents.forEach(tab => tab.classList.remove('active'));
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    
+                    // Активируем выбранную вкладку и элемент навигации
+                    document.getElementById(tabId).classList.add('active');
+                    item.classList.add('active');
+                });
             });
         }
         
-        // Функция выбора рубашки карт
-        function selectCardBack(backId) {
-            selectedCardBack = backId;
-            document.querySelectorAll('.card-back-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            document.querySelectorAll('.card-back-option')[backId-1].classList.add('selected');
+        // Запуск таймера
+        function startTimer() {
+            clearInterval(timerInterval);
+            timer = 60;
+            updateTimerDisplay();
             
-            // Сохраняем выбор в localStorage
-            localStorage.setItem('cardBack', backId);
-        }
-        
-        // Функции для работы с кошельком
-        function connectWallet() {
-            // Имитация подключения кошелька
-            setTimeout(() => {
-                walletConnected = true;
-                document.getElementById('wallet-not-connected').style.display = 'none';
-                document.getElementById('wallet-connected').style.display = 'block';
-                document.getElementById('ton-balance').textContent = '5.42';
-                document.getElementById('wallet-address').textContent = 'EQABCD1234...WXYZ';
+            timerInterval = setInterval(() => {
+                timer--;
+                updateTimerDisplay();
                 
-                // Сохраняем статус подключения
-                localStorage.setItem('walletConnected', 'true');
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    spinWheel();
+                }
             }, 1000);
         }
         
-        function depositFunds() {
-            const amount = prompt('Введите сумму для пополнения (в TON):', '1');
-            if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
-                alert(`Запрос на пополнение на ${amount} TON отправлен!`);
-                // В реальном приложении здесь будет логика взаимодействия с кошельком
-            }
+        // Обновление отображения таймера
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
-        function withdrawFunds() {
-            const amount = prompt('Введите сумму для вывода (в TON):', '1');
-            if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
-                alert(`Запрос на вывод ${amount} TON отправлен!`);
-                // В реальном приложении здесь будет логика взаимодействия с кошельком
-            }
-        }
-        
-        // Загрузка сохраненных настроек
-        window.addEventListener('load', function() {
-            const savedCardBack = localStorage.getItem('cardBack');
-            if (savedCardBack) {
-                selectCardBack(parseInt(savedCardBack));
+        // Вращение рулетки
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const players = document.querySelectorAll('.player-item');
+            if (players.length === 0) {
+                isSpinning = false;
+                startTimer();
+                return;
             }
             
-            const isWalletConnected = localStorage.getItem('walletConnected');
-            if (isWalletConnected === 'true') {
-                connectWallet();
-            }
+            // Случайный угол вращения (несколько полных оборотов + случайный сектор)
+            const fullRotations = 5; // Количество полных оборотов
+            const sectorAngle = 360 / 8; // 8 секторов
+            const winningSector = Math.floor(Math.random() * 8);
+            const rotationAngle = fullRotations * 360 + winningSector * sectorAngle + Math.random() * sectorAngle;
             
-            // Обновляем статистику каждые 10 секунд
-            setInterval(updateOnlineStats, 10000);
-            updateOnlineStats();
-        });
-        
-        // Обновление онлайн статистики
-        function updateOnlineStats() {
-            // Имитация изменения статистики
-            const onlinePlayers = Math.floor(250 + Math.random() * 20);
-            const activeRooms = Math.floor(40 + Math.random() * 5);
-            const gamesPlayed = Math.floor(1200 + Math.random() * 100);
+            wheelCircle.style.transform = `rotate(${rotationAngle}deg)`;
             
-            document.getElementById('online-players').textContent = onlinePlayers;
-            document.getElementById('active-rooms').textContent = activeRooms;
-            document.getElementById('games-played').textContent = gamesPlayed;
-        }
-        
-        // Симуляция WebSocket соединения (в реальном приложении нужно использовать WebSocket)
-        let websocketSimulator = {
-            connect: function() {
-                setConnectionStatus('connecting');
-                // Имитация подключения
-                setTimeout(() => {
-                    setConnectionStatus('connected');
-                    // Имитация получения списка доступных комнат
-                    simulateWebSocketMessage({ type: 'rooms_list', rooms: [] });
-                }, 1000);
-            },
-            createRoom: function() {
-                setConnectionStatus('waiting');
-                // Генерируем случайный ID комнаты
-                roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                document.getElementById('room-id').textContent = roomId;
-                document.getElementById('room-creation').style.display = 'none';
-                document.getElementById('waiting-room').style.display = 'block';
+            // После завершения вращения
+            setTimeout(() => {
+                // Определяем победителя
+                const winnerIndex = winningSector % players.length;
+                const winner = players[winnerIndex];
+                const winnerName = winner.querySelector('.player-name').textContent;
                 
-                // Имитация ожидания противника
-                setTimeout(() => {
-                    // Имитация подключения противника
-                    opponent = {
-                        id: 'opponent_123',
-                        first_name: 'Друг',
-                        username: 'friend'
-                    };
-                    
-                    document.getElementById('opponent-avatar').textContent = opponent.first_name ? opponent.first_name[0] : 'Д';
-                    document.getElementById('opponent-name').textContent = opponent.first_name || 'Игрок';
-                    
-                    // Имитация начала игры
-                    simulateWebSocketMessage({ 
-                        type: 'game_start', 
-                        opponent: opponent,
-                        room: roomId
-                    });
-                }, 3000);
-            },
-            joinRoom: function(roomId) {
-                setConnectionStatus('connecting');
-                // Имитация подключения к комнате
-                setTimeout(() => {
-                    setConnectionStatus('connected');
-                    
-                    // Имитация успешного подключения к комнате
-                    opponent = {
-                        id: 'host_123',
-                        first_name: 'Хост',
-                        username: 'host'
-                    };
-                    
-                    document.getElementById('opponent-avatar').textContent = opponent.first_name ? opponent.first_name[0] : 'Х';
-                    document.getElementById('opponent-name').textContent = opponent.first_name || 'Хост';
-                    
-                    // Имитация начала игры
-                    simulateWebSocketMessage({ 
-                        type: 'game_start', 
-                        opponent: opponent,
-                        room: roomId
-                    });
-                }, 2000);
-            },
-            sendMessage: function(message) {
-                // Имитация отправки сообщения
-                console.log('Отправка сообщения:', message);
-                // Имитация получения сообщения
-                setTimeout(() => {
-                    simulateWebSocketMessage({
-                        type: 'message',
-                        from: opponent.id,
-                        text: message.text,
-                        timestamp: Date.now()
-                    });
-                }, 500);
-            },
-            makeMove: function(move) {
-                // Имитация отправки хода
-                console.log('Отправка хода:', move);
-                // Имитация получения хода противника
-                setTimeout(() => {
-                    simulateWebSocketMessage({
-                        type: 'move',
-                        from: opponent.id,
-                        move: simulateOpponentMove()
-                    });
-                }, 2000);
-            }
-        };
-        
-        function simulateWebSocketMessage(message) {
-            switch (message.type) {
-                case 'rooms_list':
-                    console.log('Получен список комнат:', message.rooms);
-                    break;
-                case 'game_start':
-                    console.log('Игра началась с', message.opponent);
-                    startMultiplayerGame(message.opponent);
-                    break;
-                case 'move':
-                    console.log('Получен ход от противника:', message.move);
-                    handleOpponentMove(message.move);
-                    break;
-                case 'message':
-                    console.log('Получено сообщение:', message);
-                    addMessageToChat(message.from, message.text, message.timestamp, false);
-                    break;
-                case 'error':
-                    console.error('Ошибка:', message.error);
-                    alert('Ошибка: ' + message.error);
-                    break;
-            }
+                // Показываем результат
+                alert(`Победитель: ${winnerName}!`);
+                
+                // Перезапускаем таймер
+                isSpinning = false;
+                startTimer();
+            }, 5000);
         }
         
-        function setConnectionStatus(status) {
-            connectionStatus = status;
-            const statusDot = document.getElementById('connection-status');
-            const statusText = document.getElementById('connection-text');
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            placeBetButton.addEventListener('click', () => {
+                tg.showPopup({
+                    title: 'Сделать ставку',
+                    message: 'Для ставки перейдите в бота и выберите подарок',
+                    buttons: [{ type: 'default', text: 'Перейти к боту' }]
+                });
+            });
             
-            statusDot.className = 'status-dot';
-            switch(status) {
-                case 'disconnected':
-                    statusDot.classList.add('status-offline');
-                    statusText.textContent = 'Отключено';
-                    break;
-                case 'connecting':
-                    statusDot.classList.add('status-waiting');
-                    statusText.textContent = 'Подключение...';
-                    break;
-                case 'connected':
-                    statusDot.classList.add('status-online');
-                    statusText.textContent = 'Подключено';
-                    break;
-                case 'waiting':
-                    statusDot.classList.add('status-waiting');
-                    statusText.textContent = 'Ожидание соперника...';
-                    break;
-            }
+            connectWalletButton.addEventListener('click', () => {
+                tg.showPopup({
+                    title: 'Привязать кошелек',
+                    message: 'Вы будете перенаправлены в приложение Telegram Wallet для привязки кошелька',
+                    buttons: [{ type: 'default', text: 'Продолжить' }]
+                });
+            });
         }
         
-        function selectMode(mode) {
-            gameMode = mode;
-            if (mode === 'single') {
-                document.getElementById('multiplayer-panel').style.display = 'none';
-                document.getElementById('betting-panel').style.display = 'block';
-            } else {
-                document.getElementById('betting-panel').style.display = 'none';
-                document.getElementById('multiplayer-panel').style.display = 'block';
-                websocketSimulator.connect();
-            }
-        }
-        
-        function createRoom() {
-            websocketSimulator.createRoom();
-        }
-        
-        function joinRoom(roomId = null) {
-            if (!roomId) {
-                roomId = document.getElementById('room-id-input').value.trim();
-            }
-            if (roomId) {
-                websocketSimulator.joinRoom(roomId);
-            } else {
-                alert('Введите ID комнаты');
-            }
-        }
-        
-        function cancelWaiting() {
-            document.getElementById('waiting-room').style.display = 'none';
-            document.getElementById('room-creation').style.display = 'block';
-            setConnectionStatus('connected');
-        }
-        
-        function startMultiplayerGame(opponentPlayer) {
-            opponent = opponentPlayer;
-            document.getElementById('multiplayer-panel').style.display = 'none';
-            document.getElementById('game-container').style.display = 'block';
-            document.getElementById('chat-container').style.display = 'block';
-            document.getElementById('player-info').style.display = 'flex';
-            
-            // Начинаем игру
-            startGame();
-        }
-        
-        // Остальной код игры остается без изменений
-        // (функции sendMessage, addMessageToChat, updateBalance, changeBet, startGame, initializeDeck, shuffleDeck, dealCards, determineFirstTurn, findLowestTrump, updateDeckDisplay, updateOpponentCardsDisplay, updatePlayerCardsCount, updateGameStatus, renderGame, createCardElement, getSuitSymbol, getRankSymbol, playCard, canBeat, getCardValue, botTurn, simulateOpponentMove, handleOpponentMove, takeCards, passTurn, checkGameEnd, endGame)
-        
-        // Инициализация при загрузке
-        updateBalance();
-        document.getElementById('profile-balance').textContent = balance;
+        // Запуск приложения после загрузки DOM
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
