@@ -33,6 +33,18 @@
             display: block;
         }
         
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+        }
+        
         /* Навигационная панель */
         .bottom-nav {
             position: fixed;
@@ -200,6 +212,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
         }
         
         .gift-image {
@@ -223,6 +236,21 @@
             color: #ffd700;
             font-size: 11px;
             margin-top: 4px;
+        }
+        
+        .gift-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #40a7e3;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
         }
         
         /* Стили для магазина */
@@ -334,6 +362,97 @@
             margin-top: 10px;
             cursor: pointer;
         }
+        
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #1c1c1c;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .modal-gifts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .modal-gift {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .modal-gift.selected {
+            border: 2px solid #40a7e3;
+        }
+        
+        .modal-gift-image {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .modal-button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .modal-button.primary {
+            background-color: #40a7e3;
+            color: white;
+        }
+        
+        .modal-button.secondary {
+            background-color: #333;
+            color: white;
+        }
+        
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #06d6a0;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 1002;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -351,24 +470,7 @@
                 <button class="bet-button" id="place-bet">Сделать ставку</button>
                 
                 <div class="players-list" id="players-list">
-                    <div class="player-item">
-                        <div class="player-avatar">
-                            <img src="https://via.placeholder.com/40" alt="Player">
-                        </div>
-                        <div class="player-info">
-                            <div class="player-name">Алексей</div>
-                            <div class="player-bet">Подарок: Золотая корона (100 монет)</div>
-                        </div>
-                    </div>
-                    <div class="player-item">
-                        <div class="player-avatar">
-                            <img src="https://via.placeholder.com/40" alt="Player">
-                        </div>
-                        <div class="player-info">
-                            <div class="player-name">Мария</div>
-                            <div class="player-bet">Подарок: Бриллиант (150 монет)</div>
-                        </div>
-                    </div>
+                    <div class="loading">Загрузка игроков...</div>
                 </div>
             </div>
         </div>
@@ -376,27 +478,8 @@
         <!-- Вкладка Инвентарь -->
         <div id="inventory-tab" class="tab-content">
             <h2>Мои подарки</h2>
-            <div class="inventory-grid">
-                <div class="gift-item">
-                    <div class="gift-image">🎁</div>
-                    <div class="gift-name">Обычный подарок</div>
-                    <div class="gift-value">50 монет</div>
-                </div>
-                <div class="gift-item">
-                    <div class="gift-image">👑</div>
-                    <div class="gift-name">Золотая корона</div>
-                    <div class="gift-value">100 монет</div>
-                </div>
-                <div class="gift-item">
-                    <div class="gift-image">💎</div>
-                    <div class="gift-name">Бриллиант</div>
-                    <div class="gift-value">150 монет</div>
-                </div>
-                <div class="gift-item">
-                    <div class="gift-image">🏆</div>
-                    <div class="gift-name">Трофей</div>
-                    <div class="gift-value">200 монет</div>
-                </div>
+            <div class="inventory-grid" id="inventory-grid">
+                <div class="loading">Загрузка инвентаря...</div>
             </div>
         </div>
         
@@ -410,25 +493,8 @@
                 <button class="filter-btn">Дорогие</button>
                 <button class="filter-btn">Дешёвые</button>
             </div>
-            <div class="inventory-grid">
-                <div class="gift-item">
-                    <div class="gift-image">🎁</div>
-                    <div class="gift-name">Обычный подарок</div>
-                    <div class="gift-value">50 монет</div>
-                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;">Купить</button>
-                </div>
-                <div class="gift-item">
-                    <div class="gift-image">👑</div>
-                    <div class="gift-name">Золотая корона</div>
-                    <div class="gift-value">100 монет</div>
-                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;">Купить</button>
-                </div>
-                <div class="gift-item">
-                    <div class="gift-image">💎</div>
-                    <div class="gift-name">Бриллиант</div>
-                    <div class="gift-value">150 монет</div>
-                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;">Купить</button>
-                </div>
+            <div class="inventory-grid" id="shop-grid">
+                <div class="loading">Загрузка магазина...</div>
             </div>
         </div>
         
@@ -436,21 +502,21 @@
         <div id="profile-tab" class="tab-content">
             <div class="profile-header">
                 <div class="profile-avatar">
-                    <img src="https://via.placeholder.com/80" alt="Profile">
+                    <img src="https://via.placeholder.com/80" alt="Profile" id="profile-avatar">
                 </div>
                 <div class="profile-info">
-                    <div class="profile-name">Иван Петров</div>
+                    <div class="profile-name" id="profile-name">Загрузка...</div>
                     <div class="profile-stats">
                         <div class="stat-item">
-                            <div class="stat-value">24</div>
+                            <div class="stat-value" id="games-played">0</div>
                             <div class="stat-label">Игры</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">5</div>
+                            <div class="stat-value" id="games-won">0</div>
                             <div class="stat-label">Победы</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">350</div>
+                            <div class="stat-value" id="coins">0</div>
                             <div class="stat-label">Монеты</div>
                         </div>
                     </div>
@@ -460,7 +526,7 @@
             <div class="wallet-section">
                 <div class="wallet-header">
                     <div class="wallet-title">Кошелек Telegram</div>
-                    <div class="wallet-balance">0 TON</div>
+                    <div class="wallet-balance" id="wallet-balance">0 TON</div>
                 </div>
                 <button class="connect-wallet" id="connect-wallet">Привязать кошелек</button>
             </div>
@@ -486,12 +552,46 @@
             <div>Профиль</div>
         </div>
     </div>
+    
+    <!-- Модальное окно выбора подарка для ставки -->
+    <div class="modal" id="bet-modal">
+        <div class="modal-content">
+            <div class="modal-title">Выберите подарок для ставки</div>
+            <div class="modal-gifts" id="bet-gifts">
+                <div class="loading">Загрузка подарков...</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancel-bet">Отмена</button>
+                <button class="modal-button primary" id="confirm-bet" disabled>Подтвердить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно покупки подарка -->
+    <div class="modal" id="buy-modal">
+        <div class="modal-content">
+            <div class="modal-title">Купить подарок</div>
+            <div id="buy-gift-info">
+                <div class="loading">Загрузка информации...</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancel-buy">Отмена</button>
+                <button class="modal-button primary" id="confirm-buy">Купить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
 
     <script>
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
+        
+        // Базовый URL API (замените на реальный URL вашего API)
+        const API_BASE_URL = 'https://api.yourgame.com';
         
         // Элементы DOM
         const tabContents = document.querySelectorAll('.tab-content');
@@ -500,17 +600,178 @@
         const timerElement = document.getElementById('timer');
         const placeBetButton = document.getElementById('place-bet');
         const connectWalletButton = document.getElementById('connect-wallet');
+        const playersList = document.getElementById('players-list');
+        const inventoryGrid = document.getElementById('inventory-grid');
+        const shopGrid = document.getElementById('shop-grid');
+        const betModal = document.getElementById('bet-modal');
+        const betGifts = document.getElementById('bet-gifts');
+        const cancelBet = document.getElementById('cancel-bet');
+        const confirmBet = document.getElementById('confirm-bet');
+        const buyModal = document.getElementById('buy-modal');
+        const cancelBuy = document.getElementById('cancel-buy');
+        const confirmBuy = document.getElementById('confirm-buy');
+        const buyGiftInfo = document.getElementById('buy-gift-info');
+        const notification = document.getElementById('notification');
         
-        // Переменные для игры
-        let timer = 60;
+        // Элементы профиля
+        const profileName = document.getElementById('profile-name');
+        const profileAvatar = document.getElementById('profile-avatar');
+        const gamesPlayed = document.getElementById('games-played');
+        const gamesWon = document.getElementById('games-won');
+        const coins = document.getElementById('coins');
+        const walletBalance = document.getElementById('wallet-balance');
+        
+        // Текущее состояние
+        let gameState = {
+            timer: 60,
+            isSpinning: false,
+            currentRound: 1,
+            players: [],
+            selectedGift: null
+        };
+        
+        let userData = {
+            id: null,
+            name: "",
+            avatar: "https://via.placeholder.com/80",
+            gamesPlayed: 0,
+            gamesWon: 0,
+            coins: 0,
+            walletConnected: false,
+            walletBalance: 0,
+            inventory: []
+        };
+        
+        let currentShopItemId = null;
+        
+        // Таймер для игры
         let timerInterval;
-        let isSpinning = false;
+        
+        // Функции для работы с API
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const url = `${API_BASE_URL}${endpoint}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getUserToken()}`,
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                showNotification("Ошибка соединения с сервером");
+                throw error;
+            }
+        }
+        
+        function getUserToken() {
+            // В реальном приложении токен должен браться из безопасного места
+            return tg.initData || 'demo-token';
+        }
+        
+        async function loadUserData() {
+            try {
+                const data = await apiCall('/user/profile');
+                userData = { ...userData, ...data };
+                updateProfile();
+            } catch (error) {
+                playersList.innerHTML = '<div class="error">Ошибка загрузки данных</div>';
+            }
+        }
+        
+        async function loadGameState() {
+            try {
+                const data = await apiCall('/game/state');
+                gameState = { ...gameState, ...data };
+                updateTimerDisplay();
+                updatePlayersList();
+            } catch (error) {
+                console.error('Failed to load game state:', error);
+            }
+        }
+        
+        async function loadInventory() {
+            try {
+                const data = await apiCall('/user/inventory');
+                userData.inventory = data;
+                updateInventory();
+            } catch (error) {
+                inventoryGrid.innerHTML = '<div class="error">Ошибка загрузки инвентаря</div>';
+            }
+        }
+        
+        async function loadShopItems() {
+            try {
+                const data = await apiCall('/shop/items');
+                updateShop(data);
+            } catch (error) {
+                shopGrid.innerHTML = '<div class="error">Ошибка загрузки магазина</div>';
+            }
+        }
+        
+        async function placeBet(giftId) {
+            try {
+                await apiCall('/game/bet', {
+                    method: 'POST',
+                    body: JSON.stringify({ giftId })
+                });
+                showNotification("Ставка принята!");
+                await loadGameState();
+                await loadInventory();
+            } catch (error) {
+                showNotification("Ошибка при размещении ставки");
+            }
+        }
+        
+        async function buyItem(itemId) {
+            try {
+                await apiCall('/shop/buy', {
+                    method: 'POST',
+                    body: JSON.stringify({ itemId })
+                });
+                showNotification("Покупка успешна!");
+                await loadInventory();
+                await loadUserData();
+            } catch (error) {
+                showNotification("Ошибка при покупке");
+            }
+        }
+        
+        async function connectWallet() {
+            try {
+                const result = await apiCall('/wallet/connect', {
+                    method: 'POST'
+                });
+                userData.walletConnected = result.connected;
+                userData.walletBalance = result.balance;
+                updateProfile();
+                showNotification(result.connected ? "Кошелек привязан" : "Кошелек отвязан");
+            } catch (error) {
+                showNotification("Ошибка при подключении кошелька");
+            }
+        }
         
         // Инициализация приложения
         function initApp() {
             setupNavigation();
-            startTimer();
             setupEventListeners();
+            loadInitialData();
+            startTimer();
+        }
+        
+        async function loadInitialData() {
+            await loadUserData();
+            await loadGameState();
+            await loadInventory();
+            await loadShopItems();
         }
         
         // Настройка навигации
@@ -533,79 +794,285 @@
         // Запуск таймера
         function startTimer() {
             clearInterval(timerInterval);
-            timer = 60;
             updateTimerDisplay();
             
-            timerInterval = setInterval(() => {
-                timer--;
+            timerInterval = setInterval(async () => {
+                gameState.timer--;
                 updateTimerDisplay();
                 
-                if (timer <= 0) {
+                if (gameState.timer <= 0) {
                     clearInterval(timerInterval);
-                    spinWheel();
+                    await spinWheel();
                 }
             }, 1000);
         }
         
         // Обновление отображения таймера
         function updateTimerDisplay() {
-            const minutes = Math.floor(timer / 60);
-            const seconds = timer % 60;
+            const minutes = Math.floor(gameState.timer / 60);
+            const seconds = gameState.timer % 60;
             timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
         // Вращение рулетки
-        function spinWheel() {
-            if (isSpinning) return;
+        async function spinWheel() {
+            if (gameState.isSpinning) return;
             
-            isSpinning = true;
-            const players = document.querySelectorAll('.player-item');
-            if (players.length === 0) {
-                isSpinning = false;
+            gameState.isSpinning = true;
+            
+            if (gameState.players.length === 0) {
+                gameState.isSpinning = false;
                 startTimer();
+                showNotification("Недостаточно игроков для начала раунда");
                 return;
             }
             
-            // Случайный угол вращения (несколько полных оборотов + случайный сектор)
-            const fullRotations = 5; // Количество полных оборотов
-            const sectorAngle = 360 / 8; // 8 секторов
-            const winningSector = Math.floor(Math.random() * 8);
-            const rotationAngle = fullRotations * 360 + winningSector * sectorAngle + Math.random() * sectorAngle;
-            
-            wheelCircle.style.transform = `rotate(${rotationAngle}deg)`;
-            
-            // После завершения вращения
-            setTimeout(() => {
-                // Определяем победителя
-                const winnerIndex = winningSector % players.length;
-                const winner = players[winnerIndex];
-                const winnerName = winner.querySelector('.player-name').textContent;
+            try {
+                // Запускаем вращение на сервере
+                const result = await apiCall('/game/spin', {
+                    method: 'POST'
+                });
                 
-                // Показываем результат
-                alert(`Победитель: ${winnerName}!`);
+                // Визуальное вращение
+                const rotationAngle = result.rotationAngle;
+                wheelCircle.style.transform = `rotate(${rotationAngle}deg)`;
                 
-                // Перезапускаем таймер
-                isSpinning = false;
+                // После завершения вращения
+                setTimeout(async () => {
+                    showNotification(`Победитель: ${result.winner.name}! Выигрыш: ${result.prize.name}`);
+                    
+                    // Обновляем данные
+                    await loadGameState();
+                    await loadUserData();
+                    await loadInventory();
+                    
+                    // Перезапускаем таймер
+                    gameState.isSpinning = false;
+                    startTimer();
+                }, 5000);
+            } catch (error) {
+                gameState.isSpinning = false;
                 startTimer();
-            }, 5000);
+                showNotification("Ошибка при запуске игры");
+            }
+        }
+        
+        // Обновление списка игроков
+        function updatePlayersList() {
+            playersList.innerHTML = '';
+            
+            if (gameState.players.length === 0) {
+                playersList.innerHTML = '<div class="player-item"><div class="player-info">Ожидаем игроков...</div></div>';
+                return;
+            }
+            
+            gameState.players.forEach(player => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                playerItem.innerHTML = `
+                    <div class="player-avatar">
+                        <img src="${player.avatar}" alt="${player.name}">
+                    </div>
+                    <div class="player-info">
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-bet">Подарок: ${player.bet.name} (${player.bet.value} монет)</div>
+                    </div>
+                `;
+                playersList.appendChild(playerItem);
+            });
+        }
+        
+        // Обновление инвентаря
+        function updateInventory() {
+            inventoryGrid.innerHTML = '';
+            
+            if (userData.inventory.length === 0) {
+                inventoryGrid.innerHTML = '<div class="gift-item"><div class="gift-info">Инвентарь пуст</div></div>';
+                return;
+            }
+            
+            userData.inventory.forEach(gift => {
+                if (gift.count > 0) {
+                    const giftItem = document.createElement('div');
+                    giftItem.className = 'gift-item';
+                    giftItem.innerHTML = `
+                        <div class="gift-count">${gift.count}</div>
+                        <div class="gift-image">${gift.emoji}</div>
+                        <div class="gift-name">${gift.name}</div>
+                        <div class="gift-value">${gift.value} монет</div>
+                    `;
+                    inventoryGrid.appendChild(giftItem);
+                }
+            });
+        }
+        
+        // Обновление магазина
+        function updateShop(shopItems) {
+            shopGrid.innerHTML = '';
+            
+            shopItems.forEach(item => {
+                const shopItem = document.createElement('div');
+                shopItem.className = 'gift-item';
+                shopItem.innerHTML = `
+                    <div class="gift-image">${item.emoji}</div>
+                    <div class="gift-name">${item.name}</div>
+                    <div class="gift-value">${item.price} монет</div>
+                    <div class="gift-value">Продавец: ${item.seller}</div>
+                    <button class="bet-button" style="margin-top: 8px; padding: 5px 10px; font-size: 12px;" data-id="${item.id}">Купить</button>
+                `;
+                shopGrid.appendChild(shopItem);
+            });
+            
+            // Добавляем обработчики событий для кнопок покупки
+            const buyButtons = shopGrid.querySelectorAll('button');
+            buyButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const itemId = parseInt(e.target.getAttribute('data-id'));
+                    openBuyModal(itemId);
+                });
+            });
+        }
+        
+        // Обновление профиля
+        function updateProfile() {
+            profileName.textContent = userData.name;
+            profileAvatar.src = userData.avatar;
+            gamesPlayed.textContent = userData.gamesPlayed;
+            gamesWon.textContent = userData.gamesWon;
+            coins.textContent = userData.coins;
+            walletBalance.textContent = userData.walletBalance + ' TON';
+            
+            if (userData.walletConnected) {
+                connectWalletButton.textContent = 'Отвязать кошелек';
+            } else {
+                connectWalletButton.textContent = 'Привязать кошелек';
+            }
+        }
+        
+        // Открытие модального окна для ставки
+        async function openBetModal() {
+            betGifts.innerHTML = '<div class="loading">Загрузка подарков...</div>';
+            betModal.style.display = 'flex';
+            
+            try {
+                // Загружаем доступные для ставки подарки
+                const availableGifts = userData.inventory.filter(gift => gift.count > 0);
+                
+                if (availableGifts.length === 0) {
+                    betGifts.innerHTML = '<div class="modal-gift">В инвентаре нет подарков</div>';
+                    confirmBet.disabled = true;
+                    return;
+                }
+                
+                betGifts.innerHTML = '';
+                
+                availableGifts.forEach(gift => {
+                    const giftElement = document.createElement('div');
+                    giftElement.className = 'modal-gift';
+                    giftElement.innerHTML = `
+                        <div class="modal-gift-image">${gift.emoji}</div>
+                        <div>${gift.name}</div>
+                    `;
+                    giftElement.addEventListener('click', () => {
+                        // Снимаем выделение с других подарков
+                        document.querySelectorAll('.modal-gift').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        
+                        // Выделяем выбранный подарок
+                        giftElement.classList.add('selected');
+                        gameState.selectedGift = gift;
+                        confirmBet.disabled = false;
+                    });
+                    betGifts.appendChild(giftElement);
+                });
+            } catch (error) {
+                betGifts.innerHTML = '<div class="error">Ошибка загрузки</div>';
+                confirmBet.disabled = true;
+            }
+        }
+        
+        // Закрытие модального окна для ставки
+        function closeBetModal() {
+            betModal.style.display = 'none';
+            gameState.selectedGift = null;
+            confirmBet.disabled = true;
+        }
+        
+        // Открытие модального окна для покупки
+        async function openBuyModal(itemId) {
+            currentShopItemId = itemId;
+            buyGiftInfo.innerHTML = '<div class="loading">Загрузка информации...</div>';
+            buyModal.style.display = 'flex';
+            
+            try {
+                // Загружаем информацию о товаре
+                const shopItems = await apiCall('/shop/items');
+                const item = shopItems.find(i => i.id === itemId);
+                
+                if (item) {
+                    buyGiftInfo.innerHTML = `
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div style="font-size: 40px;">${item.emoji}</div>
+                            <div style="font-weight: bold; margin: 10px 0;">${item.name}</div>
+                            <div>Цена: <span style="color: #ffd700;">${item.price} монет</span></div>
+                            <div>Продавец: ${item.seller}</div>
+                        </div>
+                    `;
+                } else {
+                    buyGiftInfo.innerHTML = '<div class="error">Товар не найден</div>';
+                }
+            } catch (error) {
+                buyGiftInfo.innerHTML = '<div class="error">Ошибка загрузки</div>';
+            }
+        }
+        
+        // Закрытие модального окна для покупки
+        function closeBuyModal() {
+            buyModal.style.display = 'none';
+            currentShopItemId = null;
+        }
+        
+        // Показать уведомление
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         }
         
         // Настройка обработчиков событий
         function setupEventListeners() {
             placeBetButton.addEventListener('click', () => {
-                tg.showPopup({
-                    title: 'Сделать ставку',
-                    message: 'Для ставки перейдите в бота и выберите подарок',
-                    buttons: [{ type: 'default', text: 'Перейти к боту' }]
-                });
+                openBetModal();
             });
             
-            connectWalletButton.addEventListener('click', () => {
-                tg.showPopup({
-                    title: 'Привязать кошелек',
-                    message: 'Вы будете перенаправлены в приложение Telegram Wallet для привязки кошелька',
-                    buttons: [{ type: 'default', text: 'Продолжить' }]
-                });
+            cancelBet.addEventListener('click', () => {
+                closeBetModal();
+            });
+            
+            confirmBet.addEventListener('click', async () => {
+                if (gameState.selectedGift) {
+                    closeBetModal();
+                    await placeBet(gameState.selectedGift.id);
+                }
+            });
+            
+            cancelBuy.addEventListener('click', () => {
+                closeBuyModal();
+            });
+            
+            confirmBuy.addEventListener('click', async () => {
+                if (currentShopItemId) {
+                    closeBuyModal();
+                    await buyItem(currentShopItemId);
+                }
+            });
+            
+            connectWalletButton.addEventListener('click', async () => {
+                await connectWallet();
             });
         }
         
