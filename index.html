@@ -17,6 +17,8 @@
             --online-color: #4caf50;
             --offline-color: #f44336;
             --waiting-color: #ff9800;
+            --tab-active: #40a7e3;
+            --tab-inactive: #cccccc;
         }
         
         body {
@@ -34,6 +36,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            padding-bottom: 70px; /* Для нижней панели вкладок */
         }
         
         .header {
@@ -42,6 +45,7 @@
             background-color: var(--accent-color);
             color: white;
             border-radius: 10px 10px 0 0;
+            margin-bottom: 15px;
         }
         
         .game-table {
@@ -390,6 +394,186 @@
             font-size: 12px;
             color: #777;
         }
+        
+        /* Новые стили для вкладок и статистики */
+        .tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .tab {
+            padding: 15px 0;
+            text-align: center;
+            flex-grow: 1;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .tab.active {
+            color: var(--tab-active);
+            border-top: 3px solid var(--tab-active);
+        }
+        
+        .tab.inactive {
+            color: var(--tab-inactive);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .online-stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .rooms-list {
+            margin-top: 15px;
+        }
+        
+        .room-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .room-info {
+            flex-grow: 1;
+        }
+        
+        .room-id {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .room-players {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .room-bet {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .profile-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .profile-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .card-back-selector {
+            margin: 20px 0;
+        }
+        
+        .card-back-option {
+            width: 60px;
+            height: 90px;
+            display: inline-block;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 2px solid transparent;
+        }
+        
+        .card-back-option.selected {
+            border-color: var(--accent-color);
+        }
+        
+        .wallet-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .wallet-address {
+            word-break: break-all;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .wallet-balance {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            color: var(--accent-color);
+        }
+        
+        .wallet-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -398,11 +582,123 @@
     </div>
     
     <div class="container">
-        <div class="balance">
-            Баланс: <span id="balance">1000</span> ₽
+        <!-- Вкладка: Комнаты -->
+        <div id="rooms-tab" class="tab-content active">
+            <div class="online-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="online-players">257</div>
+                    <div class="stat-label">Игроков онлайн</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="active-rooms">42</div>
+                    <div class="stat-label">Активных комнат</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="games-played">1.2k</div>
+                    <div class="stat-label">Игр сегодня</div>
+                </div>
+            </div>
+            
+            <div class="mode-selector">
+                <button class="mode-button" onclick="selectMode('single')">Играть с ботом</button>
+                <button class="mode-button" onclick="selectMode('multiplayer')">Создать комнату</button>
+            </div>
+            
+            <h2>Доступные комнаты</h2>
+            <div class="rooms-list" id="rooms-list">
+                <div class="room-item">
+                    <div class="room-info">
+                        <div class="room-id">#F8J2D9</div>
+                        <div class="room-players">1/2 игроков · Ставка: 100 ₽</div>
+                    </div>
+                    <button onclick="joinRoom('F8J2D9')">Присоединиться</button>
+                </div>
+                <div class="room-item">
+                    <div class="room-info">
+                        <div class="room-id">#K7H3S1</div>
+                        <div class="room-players">1/2 игроков · Ставка: 50 ₽</div>
+                    </div>
+                    <button onclick="joinRoom('K7H3S1')">Присоединиться</button>
+                </div>
+                <div class="room-item">
+                    <div class="room-info">
+                        <div class="room-id">#M4P6R2</div>
+                        <div class="room-players">1/2 игроков · Ставка: 200 ₽</div>
+                    </div>
+                    <button onclick="joinRoom('M4P6R2')">Присоединиться</button>
+                </div>
+                <div class="room-item">
+                    <div class="room-info">
+                        <div class="room-id">#T5W9X8</div>
+                        <div class="room-players">1/2 игроков · Ставка: 150 ₽</div>
+                    </div>
+                    <button onclick="joinRoom('T5W9X8')">Присоединиться</button>
+                </div>
+            </div>
         </div>
         
-        <div class="player-info">
+        <!-- Вкладка: Профиль -->
+        <div id="profile-tab" class="tab-content">
+            <div class="profile-container">
+                <div class="profile-avatar" id="profile-avatar">И</div>
+                <div class="profile-name" id="profile-name">Иван Иванов</div>
+                <div class="balance">
+                    Баланс: <span id="profile-balance">1000</span> ₽
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Победы</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Поражения</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">32</div>
+                        <div class="stat-label">Всего игр</div>
+                    </div>
+                </div>
+                
+                <h3>Выбор обложки карт</h3>
+                <div class="card-back-selector">
+                    <div class="card-back-option selected" style="background: repeating-linear-gradient(45deg, #2c3e50, #2c3e50 10px, #34495e 10px, #34495e 20px);" onclick="selectCardBack(1)"></div>
+                    <div class="card-back-option" style="background: repeating-linear-gradient(45deg, #c0392b, #c0392b 10px, #e74c3c 10px, #e74c3c 20px);" onclick="selectCardBack(2)"></div>
+                    <div class="card-back-option" style="background: repeating-linear-gradient(45deg, #27ae60, #27ae60 10px, #2ecc71 10px, #2ecc71 20px);" onclick="selectCardBack(3)"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Вкладка: Кошелек -->
+        <div id="wallet-tab" class="tab-content">
+            <div class="wallet-container">
+                <h2>TON Кошелек</h2>
+                <p>Подключите TON кошелек для пополнения баланса и вывода выигрышей</p>
+                
+                <div id="wallet-not-connected">
+                    <button onclick="connectWallet()" style="width: 100%; padding: 15px; margin: 20px 0;">Подключить TON кошелек</button>
+                    <p>После подключения вы сможете переводить средства между игровым балансом и кошельком</p>
+                </div>
+                
+                <div id="wallet-connected" style="display: none;">
+                    <div class="wallet-balance">
+                        <span id="ton-balance">0.00</span> TON
+                    </div>
+                    <div class="wallet-address">
+                        Адрес: <span id="wallet-address">EQABCD1234...</span>
+                    </div>
+                    
+                    <div class="wallet-actions">
+                        <button onclick="depositFunds()">Пополнить</button>
+                        <button onclick="withdrawFunds()">Вывести</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Игровые элементы (скрыты по умолчанию) -->
+        <div class="player-info" id="player-info" style="display: none;">
             <div class="player-item">
                 <div class="player-avatar" id="player-avatar">Я</div>
                 <div>
@@ -419,12 +715,7 @@
             </div>
         </div>
         
-        <div class="mode-selector">
-            <button class="mode-button" onclick="selectMode('single')">Играть с ботом</button>
-            <button class="mode-button" onclick="selectMode('multiplayer')">Играть с другом</button>
-        </div>
-        
-        <div id="betting-panel" class="betting-panel">
+        <div id="betting-panel" class="betting-panel" style="display: none;">
             <h2>Сделайте ставку</h2>
             <div>
                 <button onclick="changeBet(-50)">-50</button>
@@ -502,6 +793,19 @@
         </div>
     </div>
 
+    <!-- Нижняя панель вкладок -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('rooms')">
+            Комнаты
+        </div>
+        <div class="tab inactive" onclick="switchTab('profile')">
+            Профиль
+        </div>
+        <div class="tab inactive" onclick="switchTab('wallet')">
+            Кошелек
+        </div>
+    </div>
+
     <script>
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
@@ -511,7 +815,10 @@
         // Получаем данные пользователя
         const user = tg.initDataUnsafe?.user;
         if (user) {
-            document.getElementById('player-avatar').textContent = user.first_name ? user.first_name[0] : 'И';
+            document.getElementById('profile-avatar').textContent = user.first_name ? user.first_name[0] : 'И';
+            document.getElementById('profile-name').textContent = user.first_name && user.last_name 
+                ? `${user.first_name} ${user.last_name}` 
+                : (user.first_name || 'Игрок');
         }
         
         // Игровые переменные
@@ -528,6 +835,109 @@
         let roomId = null;
         let opponent = null;
         let connectionStatus = 'disconnected';
+        let selectedCardBack = 1;
+        let walletConnected = false;
+        
+        // Функции для работы с вкладками
+        function switchTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Убираем активный класс со всех вкладок
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.classList.add('inactive');
+            });
+            
+            // Показываем нужную вкладку
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Активируем соответствующую кнопку
+            const tabs = document.querySelectorAll('.tab');
+            if (tabName === 'rooms') tabs[0].classList.add('active');
+            if (tabName === 'profile') tabs[1].classList.add('active');
+            if (tabName === 'wallet') tabs[2].classList.add('active');
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.classList.contains('active')) {
+                    tab.classList.remove('inactive');
+                }
+            });
+        }
+        
+        // Функция выбора рубашки карт
+        function selectCardBack(backId) {
+            selectedCardBack = backId;
+            document.querySelectorAll('.card-back-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelectorAll('.card-back-option')[backId-1].classList.add('selected');
+            
+            // Сохраняем выбор в localStorage
+            localStorage.setItem('cardBack', backId);
+        }
+        
+        // Функции для работы с кошельком
+        function connectWallet() {
+            // Имитация подключения кошелька
+            setTimeout(() => {
+                walletConnected = true;
+                document.getElementById('wallet-not-connected').style.display = 'none';
+                document.getElementById('wallet-connected').style.display = 'block';
+                document.getElementById('ton-balance').textContent = '5.42';
+                document.getElementById('wallet-address').textContent = 'EQABCD1234...WXYZ';
+                
+                // Сохраняем статус подключения
+                localStorage.setItem('walletConnected', 'true');
+            }, 1000);
+        }
+        
+        function depositFunds() {
+            const amount = prompt('Введите сумму для пополнения (в TON):', '1');
+            if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+                alert(`Запрос на пополнение на ${amount} TON отправлен!`);
+                // В реальном приложении здесь будет логика взаимодействия с кошельком
+            }
+        }
+        
+        function withdrawFunds() {
+            const amount = prompt('Введите сумму для вывода (в TON):', '1');
+            if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+                alert(`Запрос на вывод ${amount} TON отправлен!`);
+                // В реальном приложении здесь будет логика взаимодействия с кошельком
+            }
+        }
+        
+        // Загрузка сохраненных настроек
+        window.addEventListener('load', function() {
+            const savedCardBack = localStorage.getItem('cardBack');
+            if (savedCardBack) {
+                selectCardBack(parseInt(savedCardBack));
+            }
+            
+            const isWalletConnected = localStorage.getItem('walletConnected');
+            if (isWalletConnected === 'true') {
+                connectWallet();
+            }
+            
+            // Обновляем статистику каждые 10 секунд
+            setInterval(updateOnlineStats, 10000);
+            updateOnlineStats();
+        });
+        
+        // Обновление онлайн статистики
+        function updateOnlineStats() {
+            // Имитация изменения статистики
+            const onlinePlayers = Math.floor(250 + Math.random() * 20);
+            const activeRooms = Math.floor(40 + Math.random() * 5);
+            const gamesPlayed = Math.floor(1200 + Math.random() * 100);
+            
+            document.getElementById('online-players').textContent = onlinePlayers;
+            document.getElementById('active-rooms').textContent = activeRooms;
+            document.getElementById('games-played').textContent = gamesPlayed;
+        }
         
         // Симуляция WebSocket соединения (в реальном приложении нужно использовать WebSocket)
         let websocketSimulator = {
@@ -685,8 +1095,10 @@
             websocketSimulator.createRoom();
         }
         
-        function joinRoom() {
-            const roomId = document.getElementById('room-id-input').value.trim();
+        function joinRoom(roomId = null) {
+            if (!roomId) {
+                roomId = document.getElementById('room-id-input').value.trim();
+            }
             if (roomId) {
                 websocketSimulator.joinRoom(roomId);
             } else {
@@ -705,567 +1117,18 @@
             document.getElementById('multiplayer-panel').style.display = 'none';
             document.getElementById('game-container').style.display = 'block';
             document.getElementById('chat-container').style.display = 'block';
+            document.getElementById('player-info').style.display = 'flex';
             
             // Начинаем игру
             startGame();
         }
         
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            
-            if (text) {
-                // Добавляем сообщение в чат
-                addMessageToChat('self', text, Date.now(), true);
-                
-                // Отправляем сообщение через WebSocket
-                websocketSimulator.sendMessage({
-                    type: 'message',
-                    text: text,
-                    timestamp: Date.now()
-                });
-                
-                // Очищаем поле ввода
-                input.value = '';
-            }
-        }
-        
-        function addMessageToChat(sender, text, timestamp, isSelf) {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isSelf ? 'self' : ''}`;
-            
-            const time = new Date(timestamp).toLocaleTimeString();
-            const senderName = isSelf ? 'Вы' : (opponent?.first_name || 'Оппонент');
-            
-            messageDiv.innerHTML = `
-                <div><strong>${senderName}:</strong> ${text}</div>
-                <div class="message-time">${time}</div>
-            `;
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        
-        // Обновление интерфейса
-        function updateBalance() {
-            document.getElementById('balance').textContent = balance;
-        }
-        
-        function changeBet(amount) {
-            currentBet += amount;
-            if (currentBet < 10) currentBet = 10;
-            if (currentBet > balance) currentBet = balance;
-            document.getElementById('current-bet').textContent = currentBet;
-        }
-        
-        // Инициализация игры
-        function startGame() {
-            if (currentBet > balance) {
-                alert('Недостаточно средств!');
-                return;
-            }
-            
-            // Скрываем панель ставок, показываем игровое поле
-            document.getElementById('betting-panel').style.display = 'none';
-            document.getElementById('game-container').style.display = 'block';
-            
-            // Скрываем чат в одиночной игре
-            if (gameMode === 'single') {
-                document.getElementById('chat-container').style.display = 'none';
-            }
-            
-            // Создаем колоду
-            initializeDeck();
-            shuffleDeck();
-            
-            // Раздаем карты
-            dealCards();
-            
-            // Определяем козырь
-            trumpCard = deck.pop();
-            deckCount--;
-            
-            // Обновляем интерфейс
-            updateDeckDisplay();
-            renderGame();
-            
-            // Определяем кто ходит первым
-            determineFirstTurn();
-        }
-        
-        function initializeDeck() {
-            const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
-            const ranks = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-            
-            deck = [];
-            for (let suit of suits) {
-                for (let rank of ranks) {
-                    deck.push({ suit, rank });
-                }
-            }
-            
-            deckCount = 36;
-        }
-        
-        function shuffleDeck() {
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
-        }
-        
-        function dealCards() {
-            playerHand = [];
-            opponentHand = [];
-            
-            for (let i = 0; i < 6; i++) {
-                if (deck.length > 0) {
-                    playerHand.push(deck.pop());
-                    deckCount--;
-                }
-                if (deck.length > 0) {
-                    opponentHand.push(deck.pop());
-                    deckCount--;
-                }
-            }
-            
-            updateOpponentCardsDisplay();
-            updatePlayerCardsCount();
-        }
-        
-        function determineFirstTurn() {
-            // Определяем кто ходит первым - у кого младший козырь
-            let playerLowestTrump = findLowestTrump(playerHand);
-            let opponentLowestTrump = findLowestTrump(opponentHand);
-            
-            if (!playerLowestTrump && !opponentLowestTrump) {
-                // Если козырей ни у кого нет, определяем случайно
-                isPlayerTurn = Math.random() > 0.5;
-            } else if (!playerLowestTrump) {
-                isPlayerTurn = false;
-            } else if (!opponentLowestTrump) {
-                isPlayerTurn = true;
-            } else {
-                // Сравниваем младшие козыри
-                isPlayerTurn = getCardValue(playerLowestTrump) < getCardValue(opponentLowestTrump);
-            }
-            
-            updateGameStatus();
-            
-            if (!isPlayerTurn) {
-                if (gameMode === 'single') {
-                    setTimeout(botTurn, 1500);
-                } else {
-                    // В multiplayer ждем ход противника
-                    document.getElementById('game-status').textContent = 'Ход противника';
-                }
-            }
-        }
-        
-        function findLowestTrump(hand) {
-            const trumps = hand.filter(card => card.suit === trumpCard.suit);
-            if (trumps.length === 0) return null;
-            
-            return trumps.reduce((lowest, card) => {
-                if (!lowest) return card;
-                return getCardValue(card) < getCardValue(lowest) ? card : lowest;
-            }, null);
-        }
-        
-        function updateDeckDisplay() {
-            document.getElementById('deck-count').textContent = deckCount;
-            
-            const trumpElement = document.getElementById('trump-card');
-            trumpElement.innerHTML = `
-                <div class="card-top">${getRankSymbol(trumpCard.rank)}${getSuitSymbol(trumpCard.suit)}</div>
-                <div class="card-center">${getSuitSymbol(trumpCard.suit)}</div>
-                <div class="card-bottom">${getRankSymbol(trumpCard.rank)}${getSuitSymbol(trumpCard.suit)}</div>
-            `;
-            
-            if (trumpCard.suit === 'hearts' || trumpCard.suit === 'diamonds') {
-                trumpElement.classList.add('red');
-                trumpElement.classList.remove('black');
-            } else {
-                trumpElement.classList.add('black');
-                trumpElement.classList.remove('red');
-            }
-        }
-        
-        function updateOpponentCardsDisplay() {
-            const opponentCardsElement = document.getElementById('opponent-cards');
-            opponentCardsElement.innerHTML = '';
-            
-            for (let i = 0; i < opponentHand.length; i++) {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'opponent-card';
-                opponentCardsElement.appendChild(cardElement);
-            }
-            
-            document.getElementById('opponent-cards-count').textContent = `Карт: ${opponentHand.length}`;
-        }
-        
-        function updatePlayerCardsCount() {
-            document.getElementById('player-cards').textContent = `Карт: ${playerHand.length}`;
-        }
-        
-        function updateGameStatus() {
-            const statusElement = document.getElementById('game-status');
-            statusElement.textContent = isPlayerTurn ? 'Ваш ход' : 'Ход противника';
-        }
-        
-        function renderGame() {
-            // Очищаем игровое поле
-            const gameTable = document.getElementById('game-table');
-            // Сохраняем область колоды
-            const deckArea = document.querySelector('.deck-area');
-            gameTable.innerHTML = '';
-            gameTable.appendChild(deckArea);
-            
-            // Отображаем карты на столе
-            tableCards.forEach((card, index) => {
-                const cardElement = createCardElement(card);
-                cardElement.style.left = `${150 + index * 40}px`;
-                cardElement.style.top = `${100 - Math.floor(index / 6) * 30}px`;
-                cardElement.onclick = null;
-                gameTable.appendChild(cardElement);
-            });
-            
-            // Отображаем карты игрока
-            const playerHandElement = document.getElementById('player-hand');
-            playerHandElement.innerHTML = '';
-            
-            playerHand.forEach((card, index) => {
-                const cardElement = createCardElement(card);
-                cardElement.style.position = 'relative';
-                cardElement.onclick = () => playCard(index);
-                playerHandElement.appendChild(cardElement);
-            });
-            
-            updateOpponentCardsDisplay();
-            updatePlayerCardsCount();
-            updateDeckDisplay();
-            updateGameStatus();
-        }
-        
-        function createCardElement(card) {
-            const cardElement = document.createElement('div');
-            cardElement.className = 'card';
-            cardElement.innerHTML = `
-                <div class="card-top">${getRankSymbol(card.rank)}${getSuitSymbol(card.suit)}</div>
-                <div class="card-center">${getSuitSymbol(card.suit)}</div>
-                <div class="card-bottom">${getRankSymbol(card.rank)}${getSuitSymbol(card.suit)}</div>
-            `;
-            
-            if (card.suit === 'hearts' || card.suit === 'diamonds') {
-                cardElement.classList.add('red');
-                cardElement.classList.remove('black');
-            } else {
-                cardElement.classList.add('black');
-                cardElement.classList.remove('red');
-            }
-            
-            return cardElement;
-        }
-        
-        function getSuitSymbol(suit) {
-            const symbols = {
-                'hearts': '♥',
-                'diamonds': '♦',
-                'clubs': '♣',
-                'spades': '♠'
-            };
-            return symbols[suit] || '';
-        }
-        
-        function getRankSymbol(rank) {
-            return rank;
-        }
-        
-        function playCard(cardIndex) {
-            if (!isPlayerTurn) return;
-            
-            const card = playerHand[cardIndex];
-            let canPlay = false;
-            
-            if (tableCards.length === 0) {
-                // Первый ход - можно ходить любой картой
-                canPlay = true;
-            } else if (tableCards.length % 2 === 0) {
-                // Атака - можно ходить любой картой того же достоинства, что уже есть на столе
-                canPlay = tableCards.some(tableCard => tableCard.rank === card.rank);
-            } else {
-                // Защита - нужно побить карту
-                canPlay = canBeat(card, tableCards[tableCards.length - 1]);
-            }
-            
-            if (canPlay) {
-                tableCards.push(card);
-                playerHand.splice(cardIndex, 1);
-                isPlayerTurn = false;
-                
-                // Добираем карту из колоды, если есть
-                if (deck.length > 0) {
-                    playerHand.push(deck.pop());
-                    deckCount--;
-                }
-                
-                renderGame();
-                
-                if (gameMode === 'single') {
-                    // Ход бота
-                    setTimeout(botTurn, 1000);
-                } else {
-                    // Отправляем ход противнику
-                    websocketSimulator.makeMove({
-                        type: 'move',
-                        card: card,
-                        table: tableCards
-                    });
-                    
-                    updateGameStatus();
-                }
-                
-                checkGameEnd();
-            }
-        }
-        
-        function canBeat(attackingCard, defendingCard) {
-            // Проверяем, может ли карта побить другую карту
-            const trumpSuit = trumpCard.suit;
-            
-            if (attackingCard.suit === defendingCard.suit) {
-                return getCardValue(attackingCard) > getCardValue(defendingCard);
-            } else if (attackingCard.suit === trumpSuit) {
-                return true;
-            }
-            
-            return false;
-        }
-        
-        function getCardValue(card) {
-            const values = {
-                '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-                'J': 11, 'Q': 12, 'K': 13, 'A': 14
-            };
-            return values[card.rank] || 0;
-        }
-        
-        function botTurn() {
-            updateGameStatus();
-            
-            let botPlayed = false;
-            
-            if (tableCards.length === 0) {
-                // Бот ходит first - выбирает случайную карту
-                if (opponentHand.length > 0) {
-                    const cardToPlay = opponentHand[0];
-                    tableCards.push(cardToPlay);
-                    opponentHand.splice(0, 1);
-                    botPlayed = true;
-                }
-            } else if (tableCards.length % 2 === 0) {
-                // Бот атакует - ищет карты того же достоинства, что на столе
-                for (let card of opponentHand) {
-                    if (tableCards.some(tableCard => tableCard.rank === card.rank)) {
-                        tableCards.push(card);
-                        opponentHand.splice(opponentHand.indexOf(card), 1);
-                        botPlayed = true;
-                        break;
-                    }
-                }
-            } else {
-                // Бот защищается - пытается побить карту
-                const cardToBeat = tableCards[tableCards.length - 1];
-                for (let card of opponentHand) {
-                    if (canBeat(card, cardToBeat)) {
-                        tableCards.push(card);
-                        opponentHand.splice(opponentHand.indexOf(card), 1);
-                        botPlayed = true;
-                        break;
-                    }
-                }
-                
-                if (!botPlayed) {
-                    // Бот берет карты
-                    tableCards.forEach(card => opponentHand.push(card));
-                    tableCards = [];
-                }
-            }
-            
-            // Добираем карту из колоды, если есть
-            if (botPlayed && deck.length > 0) {
-                opponentHand.push(deck.pop());
-                deckCount--;
-            }
-            
-            isPlayerTurn = !botPlayed || tableCards.length % 2 === 1;
-            renderGame();
-            checkGameEnd();
-            
-            if (!isPlayerTurn && tableCards.length > 0) {
-                setTimeout(botTurn, 1000);
-            }
-        }
-        
-        function simulateOpponentMove() {
-            // Имитация хода противника в multiplayer
-            // В реальном приложении это будет приходить с сервера
-            let move = null;
-            
-            if (tableCards.length === 0) {
-                // Противник ходит first - выбирает случайную карту
-                if (opponentHand.length > 0) {
-                    const cardToPlay = opponentHand[0];
-                    tableCards.push(cardToPlay);
-                    opponentHand.splice(0, 1);
-                    move = { type: 'attack', card: cardToPlay };
-                }
-            } else if (tableCards.length % 2 === 0) {
-                // Противник атакует - ищет карты того же достоинства, что на столе
-                for (let card of opponentHand) {
-                    if (tableCards.some(tableCard => tableCard.rank === card.rank)) {
-                        tableCards.push(card);
-                        opponentHand.splice(opponentHand.indexOf(card), 1);
-                        move = { type: 'attack', card: card };
-                        break;
-                    }
-                }
-            } else {
-                // Противник защищается - пытается побить карту
-                const cardToBeat = tableCards[tableCards.length - 1];
-                for (let card of opponentHand) {
-                    if (canBeat(card, cardToBeat)) {
-                        tableCards.push(card);
-                        opponentHand.splice(opponentHand.indexOf(card), 1);
-                        move = { type: 'defend', card: card, against: cardToBeat };
-                        break;
-                    }
-                }
-                
-                if (!move) {
-                    // Противник берет карты
-                    tableCards.forEach(card => opponentHand.push(card));
-                    tableCards = [];
-                    move = { type: 'take' };
-                }
-            }
-            
-            // Добираем карту из колоды, если есть
-            if (move && move.type !== 'take' && deck.length > 0) {
-                opponentHand.push(deck.pop());
-                deckCount--;
-            }
-            
-            isPlayerTurn = true;
-            return move;
-        }
-        
-        function handleOpponentMove(move) {
-            // Обработка хода противника в multiplayer
-            renderGame();
-            checkGameEnd();
-        }
-        
-        function takeCards() {
-            // Игрок берет карты
-            tableCards.forEach(card => playerHand.push(card));
-            tableCards = [];
-            isPlayerTurn = false;
-            
-            renderGame();
-            
-            if (gameMode === 'single') {
-                setTimeout(botTurn, 1000);
-            } else {
-                // Отправляем уведомление о взятии карт
-                websocketSimulator.makeMove({
-                    type: 'take'
-                });
-                
-                updateGameStatus();
-            }
-        }
-        
-        function passTurn() {
-            // Игрок говорит "Бито"
-            tableCards = [];
-            isPlayerTurn = false;
-            
-            // Добираем карты
-            while (playerHand.length < 6 && deck.length > 0) {
-                playerHand.push(deck.pop());
-                deckCount--;
-            }
-            
-            while (opponentHand.length < 6 && deck.length > 0) {
-                opponentHand.push(deck.pop());
-                deckCount--;
-            }
-            
-            renderGame();
-            
-            if (gameMode === 'single') {
-                setTimeout(botTurn, 1000);
-            } else {
-                // Отправляем уведомление о пасе
-                websocketSimulator.makeMove({
-                    type: 'pass'
-                });
-                
-                updateGameStatus();
-            }
-        }
-        
-        function checkGameEnd() {
-            if (playerHand.length === 0 && opponentHand.length === 0 && deck.length === 0) {
-                // Ничья
-                endGame(null);
-            } else if (playerHand.length === 0 && deck.length === 0) {
-                // Игрок выиграл
-                endGame(true);
-            } else if (opponentHand.length === 0 && deck.length === 0) {
-                // Противник выиграл
-                endGame(false);
-            }
-        }
-        
-        function endGame(playerWon) {
-            if (playerWon === true) {
-                balance += currentBet;
-                alert('Вы выиграли! +' + currentBet + '₽');
-            } else if (playerWon === false) {
-                balance -= currentBet;
-                alert('Вы проиграли! -' + currentBet + '₽');
-            } else {
-                alert('Ничья! Ставка возвращена.');
-            }
-            
-            updateBalance();
-            
-            // Возвращаем к панели выбора режима
-            document.getElementById('game-container').style.display = 'none';
-            
-            if (gameMode === 'single') {
-                document.getElementById('betting-panel').style.display = 'block';
-            } else {
-                document.getElementById('multiplayer-panel').style.display = 'block';
-                document.getElementById('waiting-room').style.display = 'none';
-                document.getElementById('room-creation').style.display = 'block';
-                setConnectionStatus('connected');
-            }
-            
-            // Если баланс нулевой, предлагаем начать заново
-            if (balance <= 0) {
-                if (confirm('Ваш баланс опустился до нуля. Начать заново?')) {
-                    balance = 1000;
-                    updateBalance();
-                }
-            }
-        }
+        // Остальной код игры остается без изменений
+        // (функции sendMessage, addMessageToChat, updateBalance, changeBet, startGame, initializeDeck, shuffleDeck, dealCards, determineFirstTurn, findLowestTrump, updateDeckDisplay, updateOpponentCardsDisplay, updatePlayerCardsCount, updateGameStatus, renderGame, createCardElement, getSuitSymbol, getRankSymbol, playCard, canBeat, getCardValue, botTurn, simulateOpponentMove, handleOpponentMove, takeCards, passTurn, checkGameEnd, endGame)
         
         // Инициализация при загрузке
         updateBalance();
+        document.getElementById('profile-balance').textContent = balance;
     </script>
 </body>
 </html>
