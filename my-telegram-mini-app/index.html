@@ -2,17 +2,37 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Awesome Mini-App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя Mini App</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Привет, мир!</h1>
-        <p>Это мой первый Mini-App в Telegram.</p>
-        <button id="btn">Нажми меня!</button>
+        <header>
+            <h1>Моя первая Mini App</h1>
+        </header>
+        
+        <main>
+            <div class="card">
+                <h2>Добро пожаловать!</h2>
+                <p>Это пример Telegram Mini App</p>
+                <button id="mainButton" class="btn">Нажми меня</button>
+            </div>
+            
+            <div class="card">
+                <h3>Информация о пользователе</h3>
+                <div id="user-data">Загрузка...</div>
+            </div>
+            
+            <div class="card">
+                <h3>Отправить сообщение</h3>
+                <input type="text" id="messageInput" placeholder="Введите сообщение">
+                <button id="sendMessageBtn" class="btn">Отправить</button>
+            </div>
+        </main>
     </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
