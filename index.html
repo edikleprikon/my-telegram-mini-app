@@ -3,36 +3,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя Mini App</title>
-    <link rel="stylesheet" href="style.css">
+    <title>NFT Gift Marketplace</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #222222;
+            --tg-theme-button-color: #40a7e3;
+            --tg-theme-button-text-color: #ffffff;
+            --primary-color: #0088cc;
+            --secondary-color: #f0f0f0;
+            --accent-color: #40a7e3;
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 16px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--tg-theme-bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance {
+            background-color: var(--secondary-color);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+        }
+
+        .connect-wallet {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .nft-card {
+            background-color: var(--tg-theme-bg-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .nft-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .nft-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .nft-info {
+            padding: 12px;
+        }
+
+        .nft-name {
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+        }
+
+        .nft-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .buy-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--tg-theme-bg-color);
+            padding: 24px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .nft-detail-image {
+            width: 100%;
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+        }
+
+        .purchase-form {
+            margin-top: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+        }
+
+        .confirm-purchase {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .my-nfts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #888;
+        }
+
+        @media (min-width: 768px) {
+            .nft-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .my-nfts-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Моя первая Mini App</h1>
+            <div class="logo">NFT Gift Market</div>
+            <div class="wallet-info">
+                <div class="balance" id="balance">0 TON</div>
+                <button class="connect-wallet" id="connect-wallet">Connect Wallet</button>
+            </div>
         </header>
-        
-        <main>
-            <div class="card">
-                <h2>Добро пожаловать!</h2>
-                <p>Это пример Telegram Mini App</p>
-                <button id="mainButton" class="btn">Нажми меня</button>
+
+        <div class="tab-container">
+            <div class="tab active" data-tab="marketplace">Marketplace</div>
+            <div class="tab" data-tab="my-nfts">My NFTs</div>
+        </div>
+
+        <div class="tab-content active" id="marketplace-tab">
+            <div class="nft-grid" id="nft-grid">
+                <!-- NFT cards will be generated here -->
             </div>
-            
-            <div class="card">
-                <h3>Информация о пользователе</h3>
-                <div id="user-data">Загрузка...</div>
+        </div>
+
+        <div class="tab-content" id="my-nfts-tab">
+            <div class="my-nfts-grid" id="my-nfts-grid">
+                <!-- User's NFTs will be displayed here -->
             </div>
-            
-            <div class="card">
-                <h3>Отправить сообщение</h3>
-                <input type="text" id="messageInput" placeholder="Введите сообщение">
-                <button id="sendMessageBtn" class="btn">Отправить</button>
-            </div>
-        </main>
+        </div>
     </div>
-    
-    <script src="script.js"></script>
+
+    <div class="modal" id="nft-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-nft-name">NFT Name</h2>
+                <button class="close-button" id="close-modal">&times;</button>
+            </div>
+            <img src="" alt="NFT Image" class="nft-detail-image" id="modal-nft-image">
+            <p id="modal-nft-description">NFT description will appear here.</p>
+            <div class="nft-price">
+                <span class="price" id="modal-nft-price">0 TON</span>
+            </div>
+            <div class="purchase-form">
+                <div class="form-group">
+                    <label for="recipient">Send to (optional):</label>
+                    <input type="text" id="recipient" placeholder="Telegram username">
+                </div>
+                <button class="confirm-purchase" id="confirm-purchase">Buy Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Global state
+        let userBalance = 0;
+        let userAddress = null;
+        let nfts = [];
+        let userNfts = [];
+        let selectedNft = null;
+        
+        // DOM Elements
+        const balanceElement = document.getElementById('balance');
+        const connectWalletButton = document.getElementById('connect-wallet');
+        const nftGrid = document.getElementById('nft-grid');
+        const myNftsGrid = document.getElementById('my-nfts-grid');
+        const nftModal = document.getElementById('nft-modal');
+        const closeModalButton = document.getElementById('close-modal');
+        const confirmPurchaseButton = document.getElementById('confirm-purchase');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Sample NFT data (in a real app, this would come from an API)
+        const sampleNfts = [
+            {
+                id: 1,
+                name: "Holiday Gift",
+                image: "https://placehold.co/400x400/0088cc/white?text=Holiday+Gift",
+                description: "Special holiday NFT gift from Telegram",
+                price: 0.5
+            },
+            {
+                id: 2,
+                name: "Anniversary Gift",
+                image: "https://placehold.co/400x400/40a7e3/white?text=Anniversary+Gift",
+                description: "Celebratory anniversary NFT gift",
+                price: 0.8
+            },
+            {
+                id: 3,
+                name: "Birthday Gift",
+                image: "https://placehold.co/400x400/ff6b6b/white?text=Birthday+Gift",
+                description: "Exclusive birthday NFT gift",
+                price: 1.2
+            },
+            {
+                id: 4,
+                name: "Thank You Gift",
+                image: "https://placehold.co/400x400/4ecdc4/white?text=Thank+You+Gift",
+                description: "NFT gift to express gratitude",
+                price: 0.3
+            },
+            {
+                id: 5,
+                name: "Premium Gift",
+                image: "https://placehold.co/400x400/ffd166/white?text=Premium+Gift",
+                description: "Limited edition premium NFT gift",
+                price: 2.5
+            },
+            {
+                id: 6,
+                name: "Welcome Gift",
+                image: "https://placehold.co/400x400/06d6a0/white?text=Welcome+Gift",
+                description: "Welcome gift for new users",
+                price: 0.1
+            }
+        ];
+        
+        // Initialize the app
+        function init() {
+            loadNfts();
+            renderNfts();
+            setupEventListeners();
+            checkWalletConnection();
+        }
+        
+        // Load NFTs from "server"
+        function loadNfts() {
+            nfts = sampleNfts;
+            
+            // Check if user has any NFTs in local storage
+            const savedNfts = localStorage.getItem('userNfts');
+            if (savedNfts) {
+                userNfts = JSON.parse(savedNfts);
+            }
+        }
+        
+        // Render NFTs to the marketplace
+        function renderNfts() {
+            nftGrid.innerHTML = '';
+            
+            nfts.forEach(nft => {
+                const nftCard = document.createElement('div');
+                nftCard.className = 'nft-card';
+                nftCard.innerHTML = `
+                    <img src="${nft.image}" alt="${nft.name}" class="nft-image">
+                    <div class="nft-info">
+                        <h3 class="nft-name">${nft.name}</h3>
+                        <div class="nft-price">
+                            <span class="price">${nft.price} TON</span>
+                            <button class="buy-button" data-id="${nft.id}">Buy</button>
+                        </div>
+                    </div>
+                `;
+                nftGrid.appendChild(nftCard);
+            });
+            
+            // Add event listeners to buy buttons
+            document.querySelectorAll('.buy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const nftId = parseInt(e.target.getAttribute('data-id'));
+                    openNftModal(nftId);
+                });
+            });
+            
+            renderUserNfts();
+        }
+        
+        // Render user's NFTs
+        function renderUserNfts() {
+            myNftsGrid.innerHTML = '';
+            
+            if (userNfts.length === 0) {
+                myNftsGrid.innerHTML = '<div class="empty-state">You don\'t have any NFTs yet</div>';
+                return;
+            }
+            
+            userNfts.forEach(nft => {
+                const nftCard = document.createElement('div');
+                nftCard.className = 'nft-card';
+                nftCard.innerHTML = `
+                    <img src="${nft.image}" alt="${nft.name}" class="nft-image">
+                    <div class="nft-info">
+                        <h3 class="nft-name">${nft.name}</h3>
+                    </div>
+                `;
+                myNftsGrid.appendChild(nftCard);
+            });
+        }
+        
+        // Open NFT modal
+        function openNftModal(nftId) {
+            selectedNft = nfts.find(nft => nft.id === nftId);
+            
+            if (selectedNft) {
+                document.getElementById('modal-nft-name').textContent = selectedNft.name;
+                document.getElementById('modal-nft-image').src = selectedNft.image;
+                document.getElementById('modal-nft-description').textContent = selectedNft.description;
+                document.getElementById('modal-nft-price').textContent = `${selectedNft.price} TON`;
+                
+                nftModal.style.display = 'flex';
+            }
+        }
+        
+        // Close NFT modal
+        function closeNftModal() {
+            nftModal.style.display = 'none';
+            selectedNft = null;
+        }
+        
+        // Handle NFT purchase
+        function purchaseNft() {
+            if (!selectedNft) return;
+            
+            if (!userAddress) {
+                alert('Please connect your wallet first');
+                return;
+            }
+            
+            if (userBalance < selectedNft.price) {
+                alert('Insufficient balance');
+                return;
+            }
+            
+            // Simulate purchase process
+            userBalance -= selectedNft.price;
+            balanceElement.textContent = `${userBalance.toFixed(2)} TON`;
+            
+            // Add NFT to user's collection
+            userNfts.push(selectedNft);
+            localStorage.setItem('userNfts', JSON.stringify(userNfts));
+            
+            // Show success message
+            alert(`Successfully purchased ${selectedNft.name}!`);
+            
+            // Update UI
+            renderUserNfts();
+            closeNftModal();
+            
+            // In a real app, you would send a transaction to the blockchain here
+            console.log(`Purchased NFT ${selectedNft.id} for ${selectedNft.price} TON`);
+        }
+        
+        // Connect wallet
+        function connectWallet() {
+            // In a real app, this would connect to the TON wallet
+            // For demonstration, we'll simulate a connection
+            
+            userAddress = 'EQABCD1234...XYZ'; // Simulated address
+            userBalance = 10.5; // Simulated balance
+            
+            balanceElement.textContent = `${userBalance.toFixed(2)} TON`;
+            connectWalletButton.textContent = 'Connected';
+            connectWalletButton.disabled = true;
+            
+            tg.showPopup({
+                title: "Wallet Connected",
+                message: "Your TON wallet has been successfully connected.",
+                buttons: [{ type: "ok" }]
+            });
+        }
+        
+        // Check if wallet is already connected
+        function checkWalletConnection() {
+            // In a real app, you would check if the wallet is already connected
+            // For demonstration, we'll assume it's not connected initially
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            connectWalletButton.addEventListener('click', connectWallet);
+            closeModalButton.addEventListener('click', closeNftModal);
+            confirmPurchaseButton.addEventListener('click', purchaseNft);
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabName}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // Close modal when clicking outside
+            nftModal.addEventListener('click', (e) => {
+                if (e.target === nftModal) {
+                    closeNftModal();
+                }
+            });
+        }
+        
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
