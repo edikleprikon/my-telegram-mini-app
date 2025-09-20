@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFT Подарки Telegram</title>
+    <title>NFT Gift Market - TON Blockchain</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --tg-theme-bg-color: #fff;
+            --tg-theme-text-color: #222;
+            --tg-theme-button-color: #40a7e3;
+            --tg-theme-button-text-color: #fff;
+            --tg-theme-secondary-bg-color: #f1f1f1;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,59 +22,113 @@
         }
 
         body {
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #222222);
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
             padding: 16px;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 100%;
             margin: 0 auto;
         }
 
         header {
-            text-align: center;
-            margin-bottom: 24px;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #999999);
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .balance-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--tg-theme-secondary-bg-color, #f1f1f1);
-            padding: 16px;
+            padding: 12px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0088cc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ton-badge {
+            background-color: #0088cc;
+            color: white;
+            padding: 4px 8px;
             border-radius: 12px;
-            margin-bottom: 24px;
+            font-size: 0.7rem;
+            font-weight: 500;
         }
 
-        .balance-label {
-            font-size: 16px;
-            color: var(--tg-theme-hint-color, #999999);
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .balance-amount {
-            font-size: 18px;
+        .balance {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ton-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
+            color: #0088cc;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
         }
 
         .nft-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .nft-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f1f1f1);
+            background-color: var(--tg-theme-secondary-bg-color);
             border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
         }
 
@@ -76,8 +138,9 @@
 
         .nft-image {
             width: 100%;
-            aspect-ratio: 1;
+            aspect-ratio: 1/1;
             object-fit: cover;
+            background-color: #f1f3f5;
         }
 
         .nft-info {
@@ -85,30 +148,34 @@
         }
 
         .nft-name {
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nft-price {
-            color: var(--tg-theme-button-color, #40a7e3);
-            font-weight: bold;
+            color: #0088cc;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .buy-button {
-            background-color: var(--tg-theme-button-color, #40a7e3);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
             border: none;
-            padding: 12px 16px;
-            border-radius: 10px;
-            width: 100%;
-            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
             cursor: pointer;
-            margin-top: 8px;
-            transition: opacity 0.2s;
         }
 
-        .buy-button:active {
-            opacity: 0.8;
+        .buy-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .modal {
@@ -119,12 +186,13 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 1000;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
+            padding: 16px;
         }
 
         .modal.active {
@@ -133,295 +201,589 @@
         }
 
         .modal-content {
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            width: 90%;
+            background-color: var(--tg-theme-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
             max-width: 400px;
-            border-radius: 16px;
-            padding: 24px;
-            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
         }
 
         .close-button {
-            position: absolute;
-            top: 16px;
-            right: 16px;
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--tg-theme-text-color, #222222);
+            color: #6c757d;
         }
 
-        .modal-nft-image {
+        .modal-image {
             width: 100%;
             border-radius: 12px;
             margin-bottom: 16px;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            background-color: #f1f3f5;
         }
 
-        .modal-nft-name {
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .modal-nft-price {
-            font-size: 18px;
-            color: var(--tg-theme-button-color, #40a7e3);
-            margin-bottom: 16px;
-        }
-
-        .purchase-buttons {
+        .modal-actions {
             display: flex;
-            flex-direction: column;
             gap: 12px;
+            margin-top: 20px;
         }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--tg-theme-secondary-bg-color, #f1f1f1);
-            border-top: 4px solid var(--tg-theme-button-color, #40a7e3);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .cancel-button {
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .confirm-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px 0;
-            color: var(--tg-theme-hint-color, #999999);
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .connect-wallet {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .wallet-icon {
+            font-size: 3rem;
+            color: #0088cc;
+        }
+
+        .wallet-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .transaction-status {
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .transaction-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .transaction-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .transaction-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (min-width: 768px) {
+            .nft-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>NFT Подарки</h1>
-            <p>Коллекционные NFT от Telegram</p>
+            <div class="logo">
+                <span>NFT Gift Market</span>
+                <span class="ton-badge">TON</span>
+            </div>
+            <div class="user-info">
+                <div class="balance" id="userBalance">
+                    <svg class="ton-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M9.5 8.5C9.5 8.5 11 7.5 12.5 7.5C14 7.5 15.5 8.5 15.5 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M8.5 11.5C8.5 11.5 9 11 10 11C11 11 12.5 12 13.5 12C14.5 12 15.5 11.5 15.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M7.5 14.5C7.5 14.5 9 13.5 10.5 13.5C12 13.5 13.5 14.5 13.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span id="balanceAmount">0</span>
+                </div>
+                <div class="avatar" id="userAvatar">U</div>
+            </div>
         </header>
 
-        <div class="balance-container">
-            <div class="balance-label">Ваш баланс:</div>
-            <div class="balance-amount" id="balance">0 TON</div>
+        <div id="walletNotConnected" class="connect-wallet">
+            <div class="wallet-icon">💎</div>
+            <h3>Подключите кошелёк TON</h3>
+            <p>Для торговли NFT подарками необходимо подключить кошелёк TON</p>
+            <button class="wallet-button" id="connectWalletBtn">Подключить кошелёк</button>
         </div>
 
-        <div id="nft-grid" class="nft-grid">
-            <!-- NFT будут загружены здесь -->
-        </div>
+        <div id="appContent" style="display: none;">
+            <div class="tabs">
+                <div class="tab active" data-tab="market">Маркетплейс</div>
+                <div class="tab" data-tab="my-nfts">Мои NFT</div>
+                <div class="tab" data-tab="activity">Активность</div>
+            </div>
 
-        <div id="purchase-modal" class="modal">
-            <div class="modal-content">
-                <button class="close-button" id="close-modal">×</button>
-                <img id="modal-nft-image" class="modal-nft-image" src="" alt="NFT">
-                <h2 id="modal-nft-name" class="modal-nft-name"></h2>
-                <div id="modal-nft-price" class="modal-nft-price"></div>
-                <div class="purchase-buttons">
-                    <button class="buy-button" id="buy-button">Купить сейчас</button>
+            <div id="marketTab" class="tab-content">
+                <div class="nft-grid" id="nftMarketGrid">
+                    <!-- NFT cards will be generated here -->
+                </div>
+            </div>
+
+            <div id="myNftsTab" class="tab-content" style="display: none;">
+                <div class="nft-grid" id="myNftsGrid">
+                    <!-- User's NFT cards will be generated here -->
+                </div>
+            </div>
+
+            <div id="activityTab" class="tab-content" style="display: none;">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <p>Здесь будет отображаться ваша активность</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="modal" id="nftModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalNftName">NFT Name</div>
+                <button class="close-button" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-image" id="modalNftImage" style="display: flex; align-items: center; justify-content: center; font-size: 64px;"></div>
+            <div class="nft-price">
+                <span id="modalNftPrice">0 TON</span>
+                <button class="buy-button" id="buyNftButton">Купить</button>
+            </div>
+            <div id="transactionStatus" class="transaction-status" style="display: none;"></div>
+            <div class="modal-actions">
+                <button class="modal-button cancel-button" id="cancelButton">Отмена</button>
+                <button class="modal-button confirm-button" id="confirmButton">Подтвердить покупку</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Переменные приложения
-        let userBalance = 0;
-        let nfts = [];
-        let selectedNft = null;
-        
+        // Имитация данных пользователя
+        let userData = {
+            id: tg.initDataUnsafe.user?.id || 1,
+            username: tg.initDataUnsafe.user?.username || "User",
+            balance: 0,
+            nfts: [],
+            walletConnected: false,
+            address: null
+        };
+
+        // Имитация данных NFT (в реальном приложении будут загружаться из блокчейна)
+        const nftData = [
+            { 
+                id: 1, 
+                name: "Золотая звезда", 
+                price: 0.5, 
+                image: "⭐", 
+                rarity: "common",
+                owner: null,
+                collection: "TG Gifts"
+            },
+            { 
+                id: 2, 
+                name: "Бриллиантовое сердце", 
+                price: 1.5, 
+                image: "💎", 
+                rarity: "rare",
+                owner: null,
+                collection: "TG Gifts"
+            },
+            { 
+                id: 3, 
+                name: "Огненный шар", 
+                price: 2.5, 
+                image: "🔥", 
+                rarity: "epic",
+                owner: null,
+                collection: "TG Gifts"
+            },
+            { 
+                id: 4, 
+                name: "Радужная ракета", 
+                price: 5, 
+                image: "🚀", 
+                rarity: "legendary",
+                owner: null,
+                collection: "TG Gifts"
+            },
+            { 
+                id: 5, 
+                name: "Космическая луна", 
+                price: 7.5, 
+                image: "🌕", 
+                rarity: "mythical",
+                owner: null,
+                collection: "TG Gifts"
+            },
+            { 
+                id: 6, 
+                name: "Магический кристалл", 
+                price: 10, 
+                image: "🔮", 
+                rarity: "mythical",
+                owner: null,
+                collection: "TG Gifts"
+            }
+        ];
+
         // Элементы DOM
-        const balanceElement = document.getElementById('balance');
-        const nftGridElement = document.getElementById('nft-grid');
-        const purchaseModal = document.getElementById('purchase-modal');
-        const closeModalButton = document.getElementById('close-modal');
-        const modalNftImage = document.getElementById('modal-nft-image');
-        const modalNftName = document.getElementById('modal-nft-name');
-        const modalNftPrice = document.getElementById('modal-nft-price');
-        const buyButton = document.getElementById('buy-button');
-        
+        const userBalanceElement = document.getElementById('userBalance');
+        const balanceAmountElement = document.getElementById('balanceAmount');
+        const nftMarketGrid = document.getElementById('nftMarketGrid');
+        const myNftsGrid = document.getElementById('myNftsGrid');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const nftModal = document.getElementById('nftModal');
+        const modalNftName = document.getElementById('modalNftName');
+        const modalNftImage = document.getElementById('modalNftImage');
+        const modalNftPrice = document.getElementById('modalNftPrice');
+        const buyNftButton = document.getElementById('buyNftButton');
+        const closeModal = document.getElementById('closeModal');
+        const cancelButton = document.getElementById('cancelButton');
+        const confirmButton = document.getElementById('confirmButton');
+        const transactionStatus = document.getElementById('transactionStatus');
+        const connectWalletBtn = document.getElementById('connectWalletBtn');
+        const walletNotConnected = document.getElementById('walletNotConnected');
+        const appContent = document.getElementById('appContent');
+        const userAvatar = document.getElementById('userAvatar');
+
+        let selectedNft = null;
+
         // Инициализация приложения
-        function init() {
-            loadUserData();
-            loadNfts();
+        function initApp() {
+            // Установка аватара пользователя
+            if (tg.initDataUnsafe.user) {
+                userAvatar.textContent = tg.initDataUnsafe.user.first_name.charAt(0);
+            }
+            
+            // Проверка, подключен ли кошелек (в реальном приложении это будет проверяться через TON Connect)
+            const walletConnected = localStorage.getItem('walletConnected');
+            if (walletConnected === 'true') {
+                userData.walletConnected = true;
+                userData.address = localStorage.getItem('walletAddress');
+                showAppContent();
+                simulateWalletConnection();
+            } else {
+                showWalletConnect();
+            }
+            
             setupEventListeners();
         }
-        
-        // Загрузка данных пользователя
-        function loadUserData() {
-            // В реальном приложении здесь был бы запрос к серверу
-            userBalance = 15.7; // Пример баланса
-            balanceElement.textContent = `${userBalance} TON`;
+
+        // Показать экран подключения кошелька
+        function showWalletConnect() {
+            walletNotConnected.style.display = 'flex';
+            appContent.style.display = 'none';
         }
-        
-        // Загрузка NFT (в реальном приложении - с сервера)
-        function loadNfts() {
-            // Имитация загрузки
-            nftGridElement.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
+
+        // Показать основное содержимое приложения
+        function showAppContent() {
+            walletNotConnected.style.display = 'none';
+            appContent.style.display = 'block';
+            updateBalance();
+            renderMarketplace();
+        }
+
+        // Симуляция подключения кошелька TON
+        function simulateWalletConnection() {
+            // В реальном приложении здесь будет интеграция с TON Connect
+            userData.balance = 15.5; // Пример баланса в TON
+            updateBalance();
+        }
+
+        // Обновление отображения баланса
+        function updateBalance() {
+            balanceAmountElement.textContent = `${userData.balance} TON`;
+        }
+
+        // Рендер маркетплейса
+        function renderMarketplace() {
+            nftMarketGrid.innerHTML = '';
+            nftData.forEach(nft => {
+                if (!nft.owner || nft.owner !== userData.address) {
+                    const nftCard = createNftCard(nft);
+                    nftMarketGrid.appendChild(nftCard);
+                }
+            });
+        }
+
+        // Рендер коллекции пользователя
+        function renderMyNfts() {
+            myNftsGrid.innerHTML = '';
+            
+            const myNfts = nftData.filter(nft => nft.owner === userData.address);
+            
+            if (myNfts.length === 0) {
+                myNftsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎁</div>
+                        <p>У вас пока нет NFT подарков</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            myNfts.forEach(nft => {
+                const nftCard = createNftCard(nft, true);
+                myNftsGrid.appendChild(nftCard);
+            });
+        }
+
+        // Создание карточки NFT
+        function createNftCard(nft, isOwned = false) {
+            const card = document.createElement('div');
+            card.className = 'nft-card';
+            card.dataset.id = nft.id;
+            
+            const backgroundColor = getRarityColor(nft.rarity);
+            
+            card.innerHTML = `
+                <div class="nft-image" style="background-color: ${backgroundColor}; display: flex; align-items: center; justify-content: center; font-size: 48px;">
+                    ${nft.image}
+                </div>
+                <div class="nft-info">
+                    <div class="nft-name">${nft.name}</div>
+                    <div class="nft-price">
+                        <span>${isOwned ? 'Ваш NFT' : `${nft.price} TON`}</span>
+                        ${!isOwned ? '<button class="buy-button">Купить</button>' : ''}
+                    </div>
                 </div>
             `;
             
-            // Имитация задержки загрузки
-            setTimeout(() => {
-                nfts = [
-                    {
-                        id: 1,
-                        name: "Редкий подарок",
-                        price: 5.2,
-                        image: "https://via.placeholder.com/300/40a7e3/ffffff?text=Rare+Gift"
-                    },
-                    {
-                        id: 2,
-                        name: "Эпический подарок",
-                        price: 8.7,
-                        image: "https://via.placeholder.com/300/9c40e3/ffffff?text=Epic+Gift"
-                    },
-                    {
-                        id: 3,
-                        name: "Легендарный подарок",
-                        price: 12.5,
-                        image: "https://via.placeholder.com/300/e34040/ffffff?text=Legendary+Gift"
-                    },
-                    {
-                        id: 4,
-                        name: "Эксклюзивный подарок",
-                        price: 20.0,
-                        image: "https://via.placeholder.com/300/40e37f/ffffff?text=Exclusive+Gift"
-                    }
-                ];
-                
-                renderNfts();
-            }, 1000);
-        }
-        
-        // Отрисовка NFT в сетке
-        function renderNfts() {
-            if (nfts.length === 0) {
-                nftGridElement.innerHTML = `
-                    <div class="empty-state">
-                        <p>NFT пока нет в наличии</p>
-                    </div>
-                `;
-                return;
+            if (!isOwned) {
+                card.querySelector('.buy-button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openNftModal(nft);
+                });
             }
             
-            nftGridElement.innerHTML = '';
-            
-            nfts.forEach(nft => {
-                const nftCard = document.createElement('div');
-                nftCard.className = 'nft-card';
-                nftCard.innerHTML = `
-                    <img src="${nft.image}" alt="${nft.name}" class="nft-image">
-                    <div class="nft-info">
-                        <div class="nft-name">${nft.name}</div>
-                        <div class="nft-price">${nft.price} TON</div>
-                    </div>
-                `;
-                
-                nftCard.addEventListener('click', () => openPurchaseModal(nft));
-                nftGridElement.appendChild(nftCard);
+            card.addEventListener('click', () => {
+                openNftModal(nft, isOwned);
             });
+            
+            return card;
         }
-        
-        // Открытие модального окна покупки
-        function openPurchaseModal(nft) {
+
+        // Получение цвета по редкости
+        function getRarityColor(rarity) {
+            const colors = {
+                common: '#e9ecef',
+                rare: '#a3d9ff',
+                epic: '#d0bfff',
+                legendary: '#ffd8a8',
+                mythical: '#ffa8a8'
+            };
+            return colors[rarity] || '#e9ecef';
+        }
+
+        // Открытие модального окна NFT
+        function openNftModal(nft, isOwned = false) {
             selectedNft = nft;
-            modalNftImage.src = nft.image;
             modalNftName.textContent = nft.name;
-            modalNftPrice.textContent = `${nft.price} TON`;
-            purchaseModal.classList.add('active');
+            modalNftImage.textContent = nft.image;
+            modalNftImage.style.backgroundColor = getRarityColor(nft.rarity);
+            modalNftPrice.textContent = isOwned ? 'Ваш NFT' : `${nft.price} TON`;
+            transactionStatus.style.display = 'none';
+            
+            if (isOwned) {
+                buyNftButton.style.display = 'none';
+                confirmButton.style.display = 'none';
+                cancelButton.textContent = 'Закрыть';
+            } else {
+                buyNftButton.style.display = 'block';
+                confirmButton.style.display = 'block';
+                cancelButton.textContent = 'Отмена';
+                
+                // Проверка, достаточно ли средств для покупки
+                if (userData.balance < nft.price) {
+                    buyNftButton.disabled = true;
+                    buyNftButton.textContent = 'Недостаточно TON';
+                    confirmButton.disabled = true;
+                } else {
+                    buyNftButton.disabled = false;
+                    buyNftButton.textContent = 'Купить';
+                    confirmButton.disabled = false;
+                }
+            }
+            
+            nftModal.classList.add('active');
         }
-        
-        // Закрытие модального окна
-        function closePurchaseModal() {
-            purchaseModal.classList.remove('active');
-            selectedNft = null;
-        }
-        
-        // Обработка покупки NFT
-        function purchaseNft() {
+
+        // Покупка NFT
+        function buyNft() {
             if (!selectedNft) return;
             
-            if (userBalance < selectedNft.price) {
-                tg.showPopup({
-                    title: "Недостаточно средств",
-                    message: `Вам нужно еще ${selectedNft.price - userBalance} TON для покупки этого NFT.`,
-                    buttons: [{ type: 'ok' }]
-                });
-                return;
-            }
+            // Показать статус ожидания транзакции
+            transactionStatus.style.display = 'block';
+            transactionStatus.className = 'transaction-status transaction-pending';
+            transactionStatus.textContent = 'Обработка транзакции...';
             
-            // Имитация процесса покупки
-            tg.showPopup({
-                title: "Подтверждение покупки",
-                message: `Вы уверены, что хотите купить "${selectedNft.name}" за ${selectedNft.price} TON?`,
-                buttons: [
-                    { type: 'cancel' },
-                    { type: 'default', text: 'Купить', id: 'confirm' }
-                ],
-                onClose: (buttonId) => {
-                    if (buttonId === 'confirm') {
-                        processPayment();
-                    }
-                }
-            });
-        }
-        
-        // Обработка платежа через TON кошелек
-        function processPayment() {
-            // В реальном приложении здесь была бы интеграция с TON кошельком
-            tg.showPopup({
-                title: "Обработка платежа",
-                message: "Пожалуйста, подтвердите платеж в вашем TON кошельке.",
-                buttons: [{ type: 'default', text: 'Отмена', id: 'cancel' }]
-            });
-            
-            // Имитация успешного платежа
+            // Симуляция блокчейн-транзакции (в реальном приложении здесь будет вызов TON API)
             setTimeout(() => {
-                tg.closePopup();
-                userBalance -= selectedNft.price;
-                balanceElement.textContent = `${userBalance.toFixed(2)} TON`;
-                
-                tg.showPopup({
-                    title: "Покупка завершена!",
-                    message: `Вы успешно приобрели "${selectedNft.name}".`,
-                    buttons: [{ type: 'ok' }]
-                });
-                
-                closePurchaseModal();
+                if (userData.balance >= selectedNft.price) {
+                    // Симуляция успешной транзакции
+                    userData.balance -= selectedNft.price;
+                    selectedNft.owner = userData.address;
+                    
+                    updateBalance();
+                    renderMarketplace();
+                    renderMyNfts();
+                    
+                    // Показать успешный статус
+                    transactionStatus.className = 'transaction-status transaction-success';
+                    transactionStatus.textContent = `Вы успешно приобрели "${selectedNft.name}"!`;
+                    
+                    // Обновить кнопки
+                    confirmButton.style.display = 'none';
+                    cancelButton.textContent = 'Закрыть';
+                    
+                    // В реальном приложении здесь будет запись в блокчейн
+                    console.log(`NFT ${selectedNft.id} purchased by ${userData.address}`);
+                } else {
+                    // Показать ошибку
+                    transactionStatus.className = 'transaction-status transaction-error';
+                    transactionStatus.textContent = 'Недостаточно средств для покупки';
+                }
             }, 2000);
         }
-        
-        // Настройка обработчиков событий
-        function setupEventListeners() {
-            closeModalButton.addEventListener('click', closePurchaseModal);
-            buyButton.addEventListener('click', purchaseNft);
+
+        // Закрытие модального окна
+        function closeNftModal() {
+            nftModal.classList.remove('active');
+            selectedNft = null;
+        }
+
+        // Подключение кошелька TON
+        function connectWallet() {
+            // В реальном приложении здесь будет интеграция с TON Connect
+            // Для демонстрации симулируем подключение
             
-            // Закрытие модального окна при клике вне его
-            purchaseModal.addEventListener('click', (e) => {
-                if (e.target === purchaseModal) {
-                    closePurchaseModal();
-                }
+            // Генерация случайного адреса кошелька
+            const address = 'EQ' + Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
+            
+            userData.walletConnected = true;
+            userData.address = address;
+            userData.balance = 15.5; // Начальный баланс в TON
+            
+            // Сохраняем в localStorage для сохранения состояния между сессиями
+            localStorage.setItem('walletConnected', 'true');
+            localStorage.setItem('walletAddress', address);
+            
+            showAppContent();
+            
+            // Показать уведомление
+            tg.showPopup({
+                title: 'Кошелёк подключен',
+                message: `Ваш адрес: ${address}`,
+                buttons: [{ type: 'ok' }]
             });
         }
-        
-        // Запуск приложения после загрузки
-        document.addEventListener('DOMContentLoaded', init);
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Переключение вкладок
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    
+                    // Активация вкладки
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Показ соответствующего контента
+                    tabContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    document.getElementById(`${tabName}Tab`).style.display = 'block';
+                    
+                    // Если выбрана вкладка "Мои NFT", обновляем её
+                    if (tabName === 'my-nfts') {
+                        renderMyNfts();
+                    }
+                });
+            });
+            
+            // Обработчики модального окна
+            closeModal.addEventListener('click', closeNftModal);
+            cancelButton.addEventListener('click', closeNftModal);
+            buyNftButton.addEventListener('click', () => {
+                document.querySelector('.modal-actions').style.display = 'flex';
+            });
+            confirmButton.addEventListener('click', buyNft);
+            
+            // Закрытие модального окна при клике вне его
+            nftModal.addEventListener('click', (e) => {
+                if (e.target === nftModal) {
+                    closeNftModal();
+                }
+            });
+            
+            // Подключение кошелька
+            connectWalletBtn.addEventListener('click', connectWallet);
+        }
+
+        // Запуск приложения после загрузки DOM
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
