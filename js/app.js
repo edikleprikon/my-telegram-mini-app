@@ -3,6 +3,8 @@ class TelegramMiniApp {
         this.tg = window.Telegram.WebApp;
         this.currentPage = 'pvp-page';
         this.userData = null;
+        this.isDemoMode = false;
+        this.walletManager = null;
         this.init();
     }
 
@@ -22,9 +24,8 @@ class TelegramMiniApp {
         // Имитация загрузки
         setTimeout(() => {
             this.hideLoadingScreen();
-            this.showMainApp();
-            this.initNavigation();
-            this.loadUserData();
+            this.showAuthScreen();
+            this.initAuth();
         }, 2000);
     }
 
@@ -32,10 +33,87 @@ class TelegramMiniApp {
         document.getElementById('loading-screen').classList.add('hidden');
     }
 
-    showMainApp() {
-        document.getElementById('app').classList.remove('hidden');
+    showAuthScreen() {
+        document.getElementById('auth-screen').classList.remove('hidden');
     }
 
+    showMainApp() {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        this.initNavigation();
+        this.loadUserData();
+        this.initWallet();
+    }
+
+    initAuth() {
+        this.authManager = new AuthManager(this);
+    }
+
+    initWallet() {
+        this.walletManager = new WalletManager(this);
+        
+        // Проверяем, требуется ли кошелёк для текущей страницы
+        this.checkWalletRequirements();
+    }
+
+    setDemoMode(demo) {
+        this.isDemoMode = demo;
+        this.updateDemoIndicators();
+    }
+
+    updateDemoIndicators() {
+        const demoIndicator = document.createElement('div');
+        demoIndicator.className = 'demo-indicator';
+        demoIndicator.textContent = 'DEMO MODE';
+        demoIndicator.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        `;
+
+        if (this.isDemoMode) {
+            document.body.appendChild(demoIndicator);
+        } else {
+            const existing = document.querySelector('.demo-indicator');
+            if (existing) {
+                existing.remove();
+            }
+        }
+    }
+
+    checkWalletRequirements() {
+        const authData = localStorage.getItem('userAuth');
+        if (!authData) return;
+
+        const auth = JSON.parse(authData);
+        const isWalletConnected = auth.walletConnected;
+        
+        // Для PVP страницы проверяем подключение кошелька
+        const pvpContainer = document.getElementById('pvp-game-container');
+        const pvpWalletRequired = document.getElementById('pvp-wallet-required');
+        
+        if (isWalletConnected) {
+            pvpContainer.classList.remove('hidden');
+            pvpWalletRequired.classList.add('hidden');
+        } else {
+            pvpContainer.classList.add('hidden');
+            pvpWalletRequired.classList.remove('hidden');
+            
+            // Добавляем обработчик для кнопки подключения в PVP
+            document.getElementById('pvp-connect-btn').addEventListener('click', () => {
+                document.getElementById('wallet-modal').classList.remove('hidden');
+            });
+        }
+    }
+
+    // Остальные методы остаются без изменений
     initNavigation() {
         const navButtons = document.querySelectorAll('.nav-btn');
         
@@ -47,6 +125,9 @@ class TelegramMiniApp {
                 // Обновление активной кнопки
                 navButtons.forEach(btn => btn.classList.remove('active'));
                 e.currentTarget.classList.add('active');
+                
+                // Проверяем требования кошелька при переключении страниц
+                this.checkWalletRequirements();
             });
         });
     }
@@ -110,7 +191,15 @@ class TelegramMiniApp {
 
     showNotification(message, type = 'info') {
         // Простая реализация уведомления
-        alert(message);
+        if (this.tg.showPopup) {
+            this.tg.showPopup({
+                title: type === 'error' ? 'Ошибка' : 'Уведомление',
+                message: message,
+                buttons: [{ type: 'ok' }]
+            });
+        } else {
+            alert(message);
+        }
     }
 }
 
