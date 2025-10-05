@@ -317,7 +317,8 @@
         align-self: stretch;
         justify-content: center;
     }
-    /* Стили для TON Connect кнопки */
+}
+/* Стили для TON Connect кнопки */
 .ton-connect-button {
     width: 100%;
     margin-bottom: 15px;
