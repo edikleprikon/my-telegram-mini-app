@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@2.1.0/lib/index.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/loading.css">
     <link rel="stylesheet" href="css/auth.css">
@@ -27,13 +28,8 @@
             </div>
             
             <div class="auth-methods">
-                <button id="connect-wallet" class="auth-btn wallet-btn">
-                    <div class="btn-icon">💎</div>
-                    <div class="btn-text">
-                        <span class="btn-title">Подключить TON кошелёк</span>
-                        <span class="btn-subtitle">Используйте Telegram Wallet</span>
-                    </div>
-                </button>
+                <!-- TON Connect кнопка будет вставлена сюда -->
+                <div id="ton-connect-button"></div>
                 
                 <button id="demo-mode" class="auth-btn demo-btn">
                     <div class="btn-icon">🎮</div>
@@ -45,11 +41,11 @@
             </div>
 
             <div class="auth-info">
-                <h3>Преимущества авторизации:</h3>
+                <h3>Преимущества TON Connect:</h3>
                 <ul>
-                    <li>✅ Настоящие TON транзакции</li>
-                    <li>✅ Вывод выигрышей</li>
-                    <li>✅ Торговля на маркетплейсе</li>
+                    <li>✅ Безопасные транзакции</li>
+                    <li>✅ Поддержка всех TON кошельков</li>
+                    <li>✅ Вывод реальных TON</li>
                     <li>✅ Участие в турнирах</li>
                 </ul>
             </div>
@@ -65,10 +61,9 @@
                     <span class="balance-label">Баланс:</span>
                     <span class="balance-amount" id="wallet-balance">0 TON</span>
                 </div>
-                <button id="wallet-connect-btn" class="wallet-connect-btn">
-                    <span class="wallet-status disconnected"></span>
-                    Подключить кошелёк
-                </button>
+                <div id="wallet-connect-container">
+                    <!-- TON Connect кнопка для хедера -->
+                </div>
             </div>
         </header>
 
@@ -85,7 +80,7 @@
                             <div class="wallet-icon">💎</div>
                             <h3>Требуется кошелёк</h3>
                             <p>Для участия в PVP играх необходимо подключить TON кошелёк</p>
-                            <button class="btn-connect" id="pvp-connect-btn">Подключить кошелёк</button>
+                            <div id="pvp-ton-connect-button"></div>
                         </div>
                     </div>
                     <div class="wheel-container hidden" id="pvp-game-container">
@@ -101,71 +96,120 @@
                 </div>
             </div>
 
-            <!-- Остальные страницы остаются без изменений -->
             <!-- Колесо фортуны -->
             <div id="wheel-page" class="page">
-                <!-- ... существующий код ... -->
+                <div class="page-header">
+                    <h2>Колесо Фортуны</h2>
+                </div>
+                <div class="page-content">
+                    <div class="fortune-wheel-container">
+                        <div class="fortune-wheel" id="fortune-wheel">
+                            <div class="wheel-center"></div>
+                            <div class="wheel-pointer"></div>
+                        </div>
+                        <div class="ticket-info">
+                            <p>Билет: 1 TON</p>
+                            <p>Ваши билеты: <span id="ticket-count">0</span></p>
+                        </div>
+                        <button class="btn-spin" id="spin-fortune">Купить билет и крутить</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Инвентарь -->
             <div id="inventory-page" class="page">
-                <!-- ... существующий код ... -->
+                <div class="page-header">
+                    <h2>Инвентарь</h2>
+                </div>
+                <div class="page-content">
+                    <div class="inventory-grid" id="inventory-grid">
+                        <!-- Подарки будут генерироваться динамически -->
+                    </div>
+                </div>
             </div>
 
             <!-- Магазин -->
             <div id="shop-page" class="page">
-                <!-- ... существующий код ... -->
+                <div class="page-header">
+                    <h2>Магазин</h2>
+                </div>
+                <div class="page-content">
+                    <div class="shop-grid" id="shop-grid">
+                        <!-- Товары будут генерироваться динамически -->
+                    </div>
+                </div>
             </div>
 
             <!-- Профиль -->
             <div id="profile-page" class="page">
-                <!-- ... существующий код ... -->
+                <div class="page-header">
+                    <h2>Профиль</h2>
+                </div>
+                <div class="page-content">
+                    <div class="profile-info">
+                        <div class="avatar" id="user-avatar"></div>
+                        <h3 id="user-name">Пользователь</h3>
+                        <div class="balance">
+                            <p>Баланс: <span id="user-balance">100</span> TON</p>
+                        </div>
+                        <div class="stats">
+                            <div class="stat-item">
+                                <span>Побед в PVP:</span>
+                                <span id="pvp-wins">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Выиграно призов:</span>
+                                <span id="prizes-won">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Нижняя навигация -->
         <nav class="bottom-nav">
-            <!-- ... существующий код ... -->
+            <button class="nav-btn active" data-page="pvp-page">
+                <span>PVP</span>
+            </button>
+            <button class="nav-btn" data-page="wheel-page">
+                <span>Колесо</span>
+            </button>
+            <button class="nav-btn" data-page="inventory-page">
+                <span>Инвентарь</span>
+            </button>
+            <button class="nav-btn" data-page="shop-page">
+                <span>Магазин</span>
+            </button>
+            <button class="nav-btn" data-page="profile-page">
+                <span>Профиль</span>
+            </button>
         </nav>
 
-        <!-- Модальное окно для подключения кошелька -->
-        <div id="wallet-modal" class="modal hidden">
+        <!-- Модальное окно для транзакций -->
+        <div id="transaction-modal" class="modal hidden">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <h3>Подключение кошелька</h3>
-                <div class="wallet-options">
-                    <button class="wallet-option" id="connect-tonkeeper">
-                        <div class="wallet-icon">🔷</div>
-                        <div class="wallet-info">
-                            <span class="wallet-name">Tonkeeper</span>
-                            <span class="wallet-desc">Рекомендуется</span>
+                <h3>Подтверждение транзакции</h3>
+                <div class="transaction-details">
+                    <div class="transaction-info">
+                        <div class="transaction-item">
+                            <span>Сумма:</span>
+                            <span id="tx-amount">0 TON</span>
                         </div>
-                    </button>
-                    
-                    <button class="wallet-option" id="connect-telegram-wallet">
-                        <div class="wallet-icon">📱</div>
-                        <div class="wallet-info">
-                            <span class="wallet-name">Telegram Wallet</span>
-                            <span class="wallet-desc">Встроенный кошелёк</span>
+                        <div class="transaction-item">
+                            <span>Комиссия:</span>
+                            <span id="tx-fee">~0.05 TON</span>
                         </div>
-                    </button>
-                    
-                    <button class="wallet-option" id="connect-mytonwallet">
-                        <div class="wallet-icon">💼</div>
-                        <div class="wallet-info">
-                            <span class="wallet-name">MyTonWallet</span>
-                            <span class="wallet-desc">Браузерный кошелёк</span>
+                        <div class="transaction-item total">
+                            <span>Итого:</span>
+                            <span id="tx-total">0 TON</span>
                         </div>
-                    </button>
-                </div>
-                
-                <div class="wallet-tutorial">
-                    <h4>Как подключить:</h4>
-                    <ol>
-                        <li>Установите кошелёк из выбранного приложения</li>
-                        <li>Нажмите на кнопку подключения</li>
-                        <li>Подтвердите подключение в кошельке</li>
-                    </ol>
+                    </div>
+                    <div class="transaction-actions">
+                        <button id="confirm-transaction" class="btn-confirm">Подтвердить в кошельке</button>
+                        <button id="cancel-transaction" class="btn-cancel">Отмена</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -176,6 +220,7 @@
         </div>
     </div>
 
+    <script src="js/ton-connect.js"></script>
     <script src="js/app.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/wallet.js"></script>
