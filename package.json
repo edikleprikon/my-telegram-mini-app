@@ -1,0 +1,14 @@
+{
+  "name": "telegram-mini-app",
+  "version": "1.0.0",
+  "description": "Telegram Mini App with TON Connect 2.0",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8080",
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "@tonconnect/ui": "^2.1.0",
+    "@tonconnect/sdk": "^2.1.0"
+  }
+}
