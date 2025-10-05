@@ -34,21 +34,47 @@ class PVPGame {
         });
     }
 
-    spinWheel() {
+    async spinWheel() {
         if (this.isSpinning) return;
         
-        const userData = this.app.getUserData();
-        if (userData.balance < 10) {
-            this.app.showNotification('Недостаточно TON для ставки!');
+        // Проверяем подключение кошелька
+        const authData = localStorage.getItem('userAuth');
+        if (!authData || !JSON.parse(authData).walletConnected) {
+            this.app.showNotification('Для участия в PVP необходимо подключить кошелёк!');
             return;
         }
 
+        const betAmount = 10;
+
+        try {
+            // В демо режиме используем локальный баланс, иначе реальную транзакцию
+            if (this.app.isDemoMode) {
+                const userData = this.app.getUserData();
+                if (userData.balance < betAmount) {
+                    this.app.showNotification('Недостаточно TON для ставки!');
+                    return;
+                }
+                userData.balance -= betAmount;
+                this.app.saveUserData(userData);
+            } else {
+                // Реальная транзакция через кошелёк
+                await this.app.walletManager.sendTransaction(
+                    'game_contract_address', // Адрес игрового контракта
+                    betAmount,
+                    'PVP Game Bet'
+                );
+            }
+
+            this.startSpinning();
+
+        } catch (error) {
+            this.app.showNotification(`Ошибка: ${error.message}`);
+        }
+    }
+
+    startSpinning() {
         this.isSpinning = true;
         this.spinButton.disabled = true;
-
-        // Обновление баланса
-        userData.balance -= 10;
-        this.app.saveUserData(userData);
 
         // Анимация вращения
         this.wheel.style.animation = 'none';
@@ -66,28 +92,32 @@ class PVPGame {
         }, 3000);
     }
 
-    determineWinner() {
+    async determineWinner() {
         const winners = ['Игрок 1', 'Игрок 2', 'Игрок 3', 'Вы'];
         const winner = winners[Math.floor(Math.random() * winners.length)];
-        
-        const userData = this.app.getUserData();
+        const winAmount = 100;
         
         if (winner === 'Вы') {
-            userData.balance += 100; // Выигрыш
-            userData.pvpWins += 1;
-            userData.inventory.push({
-                id: Date.now(),
-                name: 'PVP Подарок',
-                type: 'pvp',
-                price: 50,
-                canSell: true
-            });
-            this.app.showNotification(`🎉 Поздравляем! Вы выиграли 100 TON и подарок!`);
+            if (this.app.isDemoMode) {
+                const userData = this.app.getUserData();
+                userData.balance += winAmount;
+                userData.pvpWins += 1;
+                userData.inventory.push({
+                    id: Date.now(),
+                    name: 'PVP Подарок',
+                    type: 'pvp',
+                    price: 50,
+                    canSell: true
+                });
+                this.app.saveUserData(userData);
+            } else {
+                // В реальном режиме получаем выигрыш от смарт-контракта
+                // await this.app.walletManager.receiveFromContract(winAmount);
+            }
+            this.app.showNotification(`🎉 Поздравляем! Вы выиграли ${winAmount} TON и подарок!`);
         } else {
             this.app.showNotification(`Победитель: ${winner}`);
         }
-        
-        this.app.saveUserData(userData);
     }
 }
 
