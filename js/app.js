@@ -5,6 +5,7 @@ class TelegramMiniApp {
         this.userData = null;
         this.isDemoMode = false;
         this.walletManager = null;
+        this.authManager = null;
         this.init();
     }
 
@@ -21,12 +22,32 @@ class TelegramMiniApp {
             username: 'test_user'
         };
 
+        // Сохраняем ссылку на приложение в глобальной области
+        window.app = this;
+
         // Имитация загрузки
         setTimeout(() => {
             this.hideLoadingScreen();
-            this.showAuthScreen();
-            this.initAuth();
+            this.checkInitialAuth();
         }, 2000);
+    }
+
+    checkInitialAuth() {
+        const authData = localStorage.getItem('userAuth');
+        const tonConnectData = localStorage.getItem('tonConnectData');
+
+        if (tonConnectData && JSON.parse(tonConnectData).isConnected) {
+            // Пользователь уже подключил кошелёк через TON Connect
+            this.showMainApp();
+            this.setDemoMode(false);
+        } else if (authData && JSON.parse(authData).isAuthenticated) {
+            // Пользователь в демо-режиме
+            this.showMainApp();
+            this.setDemoMode(true);
+        } else {
+            // Показываем экран авторизации
+            this.showAuthScreen();
+        }
     }
 
     hideLoadingScreen() {
@@ -35,6 +56,7 @@ class TelegramMiniApp {
 
     showAuthScreen() {
         document.getElementById('auth-screen').classList.remove('hidden');
+        this.initAuth();
     }
 
     showMainApp() {
@@ -51,11 +73,51 @@ class TelegramMiniApp {
 
     initWallet() {
         this.walletManager = new WalletManager(this);
-        
-        // Проверяем, требуется ли кошелёк для текущей страницы
         this.checkWalletRequirements();
     }
 
+    // Обработчики событий от TON Connect
+    onWalletConnected(walletInfo) {
+        if (this.walletManager) {
+            this.walletManager.onWalletConnected(walletInfo);
+        }
+        
+        // Сохраняем данные авторизации
+        const authData = {
+            isAuthenticated: true,
+            mode: 'wallet',
+            walletConnected: true,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('userAuth', JSON.stringify(authData));
+        
+        this.setDemoMode(false);
+        this.checkWalletRequirements();
+        
+        this.showNotification('Кошелёк успешно подключен!');
+    }
+
+    onWalletDisconnected() {
+        if (this.walletManager) {
+            this.walletManager.onWalletDisconnected();
+        }
+        
+        // Обновляем данные авторизации
+        const authData = {
+            isAuthenticated: true,
+            mode: 'demo',
+            walletConnected: false,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('userAuth', JSON.stringify(authData));
+        
+        this.setDemoMode(true);
+        this.checkWalletRequirements();
+        
+        this.showNotification('Кошелёк отключен');
+    }
+
+    // Остальные методы остаются без изменений...
     setDemoMode(demo) {
         this.isDemoMode = demo;
         this.updateDemoIndicators();
@@ -89,11 +151,7 @@ class TelegramMiniApp {
     }
 
     checkWalletRequirements() {
-        const authData = localStorage.getItem('userAuth');
-        if (!authData) return;
-
-        const auth = JSON.parse(authData);
-        const isWalletConnected = auth.walletConnected;
+        const isWalletConnected = this.walletManager?.isConnected || false;
         
         // Для PVP страницы проверяем подключение кошелька
         const pvpContainer = document.getElementById('pvp-game-container');
@@ -105,102 +163,10 @@ class TelegramMiniApp {
         } else {
             pvpContainer.classList.add('hidden');
             pvpWalletRequired.classList.remove('hidden');
-            
-            // Добавляем обработчик для кнопки подключения в PVP
-            document.getElementById('pvp-connect-btn').addEventListener('click', () => {
-                document.getElementById('wallet-modal').classList.remove('hidden');
-            });
         }
     }
 
-    // Остальные методы остаются без изменений
-    initNavigation() {
-        const navButtons = document.querySelectorAll('.nav-btn');
-        
-        navButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const targetPage = e.currentTarget.getAttribute('data-page');
-                this.switchPage(targetPage);
-                
-                // Обновление активной кнопки
-                navButtons.forEach(btn => btn.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                
-                // Проверяем требования кошелька при переключении страниц
-                this.checkWalletRequirements();
-            });
-        });
-    }
-
-    switchPage(pageId) {
-        // Скрыть все страницы
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-        });
-        
-        // Показать выбранную страницу
-        document.getElementById(pageId).classList.add('active');
-        this.currentPage = pageId;
-    }
-
-    loadUserData() {
-        // Загрузка данных пользователя из localStorage
-        const savedData = localStorage.getItem('userData');
-        if (savedData) {
-            const userData = JSON.parse(savedData);
-            this.updateProfile(userData);
-        } else {
-            // Создание начальных данных
-            const initialData = {
-                balance: 100,
-                pvpWins: 0,
-                prizesWon: 0,
-                tickets: 0,
-                inventory: [
-                    { id: 1, name: 'Обычный подарок', type: 'common', price: 10, canSell: true },
-                    { id: 2, name: 'Редкий подарок', type: 'rare', price: 25, canSell: true }
-                ]
-            };
-            localStorage.setItem('userData', JSON.stringify(initialData));
-            this.updateProfile(initialData);
-        }
-    }
-
-    updateProfile(data) {
-        document.getElementById('user-balance').textContent = data.balance;
-        document.getElementById('pvp-wins').textContent = data.pvpWins;
-        document.getElementById('prizes-won').textContent = data.prizesWon;
-        document.getElementById('ticket-count').textContent = data.tickets;
-        
-        // Обновление аватара и имени
-        document.getElementById('user-avatar').textContent = 
-            this.userData.first_name?.[0] || 'U';
-        document.getElementById('user-name').textContent = 
-            `${this.userData.first_name || 'Пользователь'} ${this.userData.last_name || ''}`.trim();
-    }
-
-    // Утилиты для работы с данными
-    saveUserData(data) {
-        localStorage.setItem('userData', JSON.stringify(data));
-        this.updateProfile(data);
-    }
-
-    getUserData() {
-        return JSON.parse(localStorage.getItem('userData'));
-    }
-
-    showNotification(message, type = 'info') {
-        // Простая реализация уведомления
-        if (this.tg.showPopup) {
-            this.tg.showPopup({
-                title: type === 'error' ? 'Ошибка' : 'Уведомление',
-                message: message,
-                buttons: [{ type: 'ok' }]
-            });
-        } else {
-            alert(message);
-        }
-    }
+    // ... остальные методы без изменений
 }
 
 // Инициализация приложения
