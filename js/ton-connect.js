@@ -1,28 +1,115 @@
-// TON Connect 2.0 интеграция
+// TON Connect 2.0 интеграция с улучшенными кнопками
 class TONConnectIntegration {
     constructor() {
         this.connector = null;
         this.walletInfo = null;
         this.isConnected = false;
         this.manifestUrl = 'https://your-app.com/tonconnect-manifest.json';
+        this.buttons = {};
         this.init();
     }
 
     async init() {
         try {
-            // Инициализация TON Connect
-            this.connector = new TonConnectUI.TonConnect({
+            // Инициализация основной кнопки TON Connect
+            this.buttons.main = new TonConnectUI.TonConnect({
                 manifestUrl: this.manifestUrl,
-                buttonRootId: 'ton-connect-button'
+                buttonRootId: 'ton-connect-button',
+                actionsConfiguration: {
+                    twaReturnUrl: 'https://t.me/your_bot/app'
+                },
+                uiPreferences: {
+                    theme: 'DARK',
+                    colorsSet: {
+                        connectButton: {
+                            background: '#0088cc',
+                            foreground: '#ffffff'
+                        }
+                    }
+                }
             });
 
-            // Подписка на события
-            this.connector.onStatusChange(wallet => {
-                this.handleWalletChange(wallet);
+            // Инициализация кнопки в хедере
+            this.buttons.header = new TonConnectUI.TonConnect({
+                manifestUrl: this.manifestUrl,
+                buttonRootId: 'header-wallet-connect',
+                actionsConfiguration: {
+                    twaReturnUrl: 'https://t.me/your_bot/app'
+                },
+                uiPreferences: {
+                    theme: 'DARK',
+                    colorsSet: {
+                        connectButton: {
+                            background: 'transparent',
+                            foreground: '#ffffff'
+                        }
+                    }
+                }
+            });
+
+            // Инициализация кнопки в PVP разделе
+            this.buttons.pvp = new TonConnectUI.TonConnect({
+                manifestUrl: this.manifestUrl,
+                buttonRootId: 'pvp-ton-connect-button',
+                actionsConfiguration: {
+                    twaReturnUrl: 'https://t.me/your_bot/app'
+                },
+                uiPreferences: {
+                    theme: 'DARK',
+                    colorsSet: {
+                        connectButton: {
+                            background: '#0088cc',
+                            foreground: '#ffffff'
+                        }
+                    }
+                }
+            });
+
+            // Инициализация кнопки в профиле
+            this.buttons.profile = new TonConnectUI.TonConnect({
+                manifestUrl: this.manifestUrl,
+                buttonRootId: 'profile-ton-connect-button',
+                actionsConfiguration: {
+                    twaReturnUrl: 'https://t.me/your_bot/app'
+                },
+                uiPreferences: {
+                    theme: 'DARK',
+                    colorsSet: {
+                        connectButton: {
+                            background: '#0088cc',
+                            foreground: '#ffffff'
+                        }
+                    }
+                }
+            });
+
+            // Инициализация кнопки в модальном окне
+            this.buttons.modal = new TonConnectUI.TonConnect({
+                manifestUrl: this.manifestUrl,
+                buttonRootId: 'modal-ton-connect-button',
+                actionsConfiguration: {
+                    twaReturnUrl: 'https://t.me/your_bot/app'
+                },
+                uiPreferences: {
+                    theme: 'DARK',
+                    colorsSet: {
+                        connectButton: {
+                            background: '#0088cc',
+                            foreground: '#ffffff'
+                        }
+                    }
+                }
+            });
+
+            // Подписка на события для всех кнопок
+            Object.values(this.buttons).forEach(connector => {
+                connector.onStatusChange(wallet => {
+                    this.handleWalletChange(wallet);
+                });
             });
 
             // Проверяем существующее подключение
-            const currentWallet = this.connector.wallet;
+            const currentWallet = this.buttons.main.wallet;
             if (currentWallet) {
                 await this.handleWalletChange(currentWallet);
             }
@@ -41,6 +128,9 @@ class TONConnectIntegration {
             // Сохраняем данные о подключении
             this.saveWalletConnection();
             
+            // Синхронизируем все кнопки
+            this.syncAllButtons();
+            
             // Уведомляем приложение
             if (window.app) {
                 window.app.onWalletConnected(this.walletInfo);
@@ -51,9 +141,37 @@ class TONConnectIntegration {
             this.walletInfo = null;
             this.clearWalletData();
             
+            // Синхронизируем все кнопки
+            this.syncAllButtons();
+            
             // Уведомляем приложение
             if (window.app) {
                 window.app.onWalletDisconnected();
+            }
+        }
+    }
+
+    syncAllButtons() {
+        // Синхронизируем состояние всех кнопок
+        Object.values(this.buttons).forEach(connector => {
+            if (this.isConnected && this.walletInfo) {
+                // Обновляем подключенное состояние
+                this.updateButtonStyle(connector, 'connected');
+            } else {
+                // Возвращаем в состояние подключения
+                this.updateButtonStyle(connector, 'disconnected');
+            }
+        });
+    }
+
+    updateButtonStyle(connector, state) {
+        // Можно добавить кастомные стили для разных состояний
+        const buttonElement = connector.getButtonRoot();
+        if (buttonElement) {
+            if (state === 'connected') {
+                buttonElement.classList.add('tc-connected');
+            } else {
+                buttonElement.classList.remove('tc-connected');
             }
         }
     }
@@ -101,44 +219,34 @@ class TONConnectIntegration {
                 balanceElement.textContent = `${this.walletInfo.balance?.toFixed(2) || '0'} TON`;
             }
 
-            // Обновляем статус подключения
-            this.updateConnectionStatus(true);
+            // Обновляем статус в профиле
+            this.updateProfileWalletStatus(true);
             
         } else {
-            this.updateConnectionStatus(false);
+            // Сбрасываем отображение
+            const balanceElement = document.getElementById('wallet-balance');
+            if (balanceElement) {
+                balanceElement.textContent = '0 TON';
+            }
+            
+            this.updateProfileWalletStatus(false);
         }
     }
 
-    updateConnectionStatus(connected) {
-        const connectContainer = document.getElementById('wallet-connect-container');
-        if (!connectContainer) return;
+    updateProfileWalletStatus(connected) {
+        const statusElement = document.getElementById('profile-wallet-status');
+        if (!statusElement) return;
 
         if (connected) {
-            connectContainer.innerHTML = `
-                <div class="wallet-connected">
-                    <span class="wallet-status connected"></span>
-                    <span class="wallet-address">${this.formatAddress(this.walletInfo.account.address)}</span>
-                    <button id="disconnect-wallet" class="btn-disconnect">Отключить</button>
-                </div>
+            statusElement.innerHTML = `
+                <span class="status-dot connected"></span>
+                <span>Кошелёк подключен</span>
             `;
-
-            // Добавляем обработчик для отключения
-            document.getElementById('disconnect-wallet').addEventListener('click', () => {
-                this.disconnect();
-            });
-
         } else {
-            connectContainer.innerHTML = `
-                <div id="header-ton-connect-button"></div>
+            statusElement.innerHTML = `
+                <span class="status-dot disconnected"></span>
+                <span>Кошелёк не подключен</span>
             `;
-
-            // Инициализируем кнопку в хедере
-            if (this.connector) {
-                new TonConnectUI.TonConnect({
-                    manifestUrl: this.manifestUrl,
-                    buttonRootId: 'header-ton-connect-button'
-                });
-            }
         }
     }
 
@@ -149,7 +257,7 @@ class TONConnectIntegration {
 
     async disconnect() {
         try {
-            await this.connector.disconnect();
+            await this.buttons.main.disconnect();
             this.clearWalletData();
         } catch (error) {
             console.error('Error disconnecting wallet:', error);
@@ -167,7 +275,6 @@ class TONConnectIntegration {
 
     clearWalletData() {
         localStorage.removeItem('tonConnectData');
-        this.updateConnectionStatus(false);
     }
 
     // Метод для отправки транзакций
@@ -177,7 +284,7 @@ class TONConnectIntegration {
         }
 
         try {
-            const result = await this.connector.sendTransaction(transaction);
+            const result = await this.buttons.main.sendTransaction(transaction);
             return result;
             
         } catch (error) {
@@ -208,6 +315,24 @@ class TONConnectIntegration {
     // Проверка подключения
     getConnectionStatus() {
         return this.isConnected;
+    }
+
+    // Показать модальное окно подключения
+    showConnectModal() {
+        const modal = document.getElementById('wallet-connect-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            
+            // Добавляем обработчик закрытия
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.onclick = () => modal.classList.add('hidden');
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            };
+        }
     }
 }
 
