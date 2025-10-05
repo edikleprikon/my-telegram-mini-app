@@ -174,3 +174,33 @@ let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new TelegramMiniApp();
 });
+class TelegramMiniApp {
+    // ... существующий код ...
+
+    enterDemoMode() {
+        const authData = {
+            isAuthenticated: true,
+            mode: 'demo',
+            walletConnected: false,
+            timestamp: Date.now()
+        };
+        
+        localStorage.setItem('userAuth', JSON.stringify(authData));
+        
+        // Закрываем модальные окна
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.add('hidden');
+        });
+        
+        this.hideAuthScreen();
+        this.showMainApp();
+        this.setDemoMode(true);
+        
+        this.showNotification('Демо режим активирован! Используются тестовые TON');
+    }
+
+    // ... остальной код ...
+}
+
+// Делаем метод доступным глобально для кнопок
+window.app = new TelegramMiniApp();
